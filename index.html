@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Switch · Prep Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0d;--panel:#141417;--panel-2:#1a1a1e;--line:#27272d;--line-soft:#1f1f24;
+    --text:#e9e7e1;--muted:#8b8b94;--faint:#5c5c64;--accent:#f5b544;
+    --dsa:#f5b544;--hld:#a78bfa;--lld:#43d6c4;--core:#f87171;--proc:#9ad36a;--go:#5fb4e8;
+    --mono:'JetBrains Mono',ui-monospace,monospace;--body:'Hanken Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.5;min-height:100vh;
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%, rgba(245,181,68,.07), transparent 60%),
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size:auto, 46px 46px, 46px 46px;background-position:0 0,-1px -1px,-1px -1px;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:38px 22px 90px}
+  header{margin-bottom:26px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{font-family:var(--mono);font-weight:800;font-size:clamp(28px,5vw,44px);letter-spacing:-.01em;line-height:1.02;margin:10px 0 6px}
+  h1 .slash{color:var(--faint);font-weight:400}
+  .sub{color:var(--muted);font-size:15px;max-width:600px}
+  .pace{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.7}
+
+  .dash{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin:24px 0 26px}
+  @media(max-width:680px){.dash{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .card.count{display:flex;flex-direction:column;justify-content:space-between}
+  .big-pct{font-family:var(--mono);font-weight:800;font-size:54px;line-height:1;letter-spacing:-.02em}
+  .big-pct span{font-size:24px;color:var(--faint)}
+  .overall-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .overall-bar{height:8px;background:var(--panel-2);border-radius:99px;overflow:hidden;margin-top:16px;border:1px solid var(--line-soft)}
+  .overall-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f5b544,#f7cf7a);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .done-count{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:10px}
+  .countdown{display:flex;flex-direction:column;gap:4px}
+  .cd-num{font-family:var(--mono);font-weight:800;font-size:40px;line-height:1}
+  .cd-sub{color:var(--muted);font-size:13px}
+  .cd-target{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:14px}
+
+  .tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 24px;margin-bottom:30px}
+  @media(max-width:680px){.tracks{grid-template-columns:1fr}}
+  .trk-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .trk-name{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .trk-pct{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .trk-bar{height:6px;background:var(--panel-2);border-radius:99px;overflow:hidden;border:1px solid var(--line-soft)}
+  .trk-bar i{display:block;height:100%;width:0;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+  .filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;align-items:center}
+  .filter .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-right:4px}
+  .chip{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 11px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:.18s;text-transform:uppercase}
+  .chip:hover{border-color:var(--faint);color:var(--text)}
+  .chip.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+  .section{background:var(--panel);border:1px solid var(--line);border-radius:13px;margin-bottom:12px;overflow:hidden}
+  .section.sup{background:transparent;border-style:dashed;border-color:var(--line-soft)}
+  .sec-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;transition:background .15s}
+  .sec-head:hover{background:var(--panel-2)}
+  .sec-bullet{width:11px;height:11px;border-radius:4px;flex-shrink:0}
+  .sec-title{font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:-.01em;flex:1}
+  .sec-title .tiny{color:var(--faint);font-weight:400}
+  .sec-meta{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+  .sec-chev{color:var(--faint);transition:transform .25s;font-family:var(--mono)}
+  .section.open .sec-chev{transform:rotate(90deg)}
+  .sec-body{display:none;padding:2px 18px 14px;border-top:1px solid var(--line-soft)}
+  .section.open .sec-body{display:block}
+  .miniprog{height:4px;background:var(--panel-2);border-radius:99px;overflow:hidden;margin:0 18px 14px;border:1px solid var(--line-soft)}
+  .section:not(.open) .miniprog{display:none}
+  .miniprog i{display:block;height:100%;width:0;border-radius:99px;transition:width .45s cubic-bezier(.4,0,.2,1)}
+
+  .grp{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);padding:14px 4px 6px;border-bottom:1px solid var(--line-soft);margin-bottom:2px}
+  .task{display:flex;align-items:flex-start;gap:12px;padding:9px 4px;border-bottom:1px solid var(--line-soft)}
+  .task:last-child{border-bottom:none}
+  .task.hide{display:none}
+  .cb{appearance:none;-webkit-appearance:none;width:19px;height:19px;flex-shrink:0;margin-top:1px;border:1.6px solid var(--faint);border-radius:5px;cursor:pointer;position:relative;transition:.15s;background:transparent}
+  .cb:hover{border-color:var(--text)}
+  .cb:checked{background:var(--accent);border-color:var(--accent)}
+  .cb:checked::after{content:"";position:absolute;left:5.5px;top:2px;width:5px;height:9px;border:solid var(--bg);border-width:0 2.2px 2.2px 0;transform:rotate(45deg)}
+  .task-text{font-size:14px;flex:1;transition:.2s;cursor:pointer}
+  .task.done .task-text{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--line)}
+  .task-meta{font-family:var(--mono);font-size:10.5px;color:var(--faint);white-space:nowrap;margin-top:2px}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:38px;flex-wrap:wrap;gap:14px}
+  .save-state{font-family:var(--mono);font-size:11px;color:var(--faint);display:flex;align-items:center;gap:7px}
+  .save-state .pulse{width:7px;height:7px;border-radius:99px;background:var(--proc)}
+  .reset{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--line);padding:8px 14px;border-radius:8px;cursor:pointer;transition:.18s}
+  .reset:hover{border-color:var(--core);color:var(--core)}
+  .note{font-family:var(--mono);font-size:11px;color:var(--faint);text-align:center;margin-top:26px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Backend Switch · 2026</div>
+    <h1>Prep Console <span class="slash">// Java&nbsp;·&nbsp;Backend</span></h1>
+    <p class="sub">The three courses, complete and exact, plus the interview-shape work the courses don't cover. Tick things off — progress saves and persists between sessions.</p>
+    <p class="pace">Suggested pace · ~2 DSA topics + ~3 HLD sections + 1 HF chapter per week → first pass by late Aug, then revise &amp; interview.</p>
+  </header>
+
+  <div class="dash">
+    <div class="card count">
+      <div><div class="overall-label">Overall completion</div><div class="big-pct" id="bigPct">0<span>%</span></div></div>
+      <div><div class="overall-bar"><i id="overallBar"></i></div><div class="done-count" id="doneCount">0 / 0 items done</div></div>
+    </div>
+    <div class="card countdown">
+      <div class="cd-sub">Weeks until target</div>
+      <div class="cd-num" id="weeksLeft">—</div>
+      <div class="cd-sub" id="daysLeft"></div>
+      <div class="cd-target">Target&nbsp;·&nbsp;31&nbsp;Dec&nbsp;2026</div>
+    </div>
+  </div>
+
+  <div class="tracks" id="tracks"></div>
+
+  <div class="filter" id="filter">
+    <span class="lbl">Filter</span>
+    <button class="chip active" data-f="all">All</button>
+    <button class="chip" data-f="dsa">DSA</button>
+    <button class="chip" data-f="hld">HLD</button>
+    <button class="chip" data-f="lld">LLD</button>
+    <button class="chip" data-f="core">Java Core</button>
+    <button class="chip" data-f="proc">Process</button>
+    <button class="chip" data-f="go">Go</button>
+  </div>
+
+  <div id="plan"></div>
+
+  <div class="foot">
+    <div class="save-state"><span class="pulse"></span><span id="saveText">Ready</span></div>
+    <button class="reset" id="resetBtn">Reset all progress</button>
+  </div>
+
+  <p class="note">NeetCode 150 · Grokking Modern System Design Interview · Head First Design Patterns<br>Code every problem with AI off. Apply by August. Mocks from September.</p>
+</div>
+
+<script>
+const COLORS={dsa:"var(--dsa)",hld:"var(--hld)",lld:"var(--lld)",core:"var(--core)",proc:"var(--proc)",go:"var(--go)"};
+
+const SECTIONS=[
+  {id:"dsa",track:"dsa",title:"DSA · NeetCode 150",sub:"150 problems · 18 topics",unit:"problems",
+   items:[
+    {id:"dsa-01",text:"Arrays & Hashing",n:9},
+    {id:"dsa-02",text:"Two Pointers",n:5},
+    {id:"dsa-03",text:"Sliding Window",n:6},
+    {id:"dsa-04",text:"Stack",n:6},
+    {id:"dsa-05",text:"Binary Search",n:7},
+    {id:"dsa-06",text:"Linked List",n:11},
+    {id:"dsa-07",text:"Trees",n:15},
+    {id:"dsa-08",text:"Heap / Priority Queue",n:7},
+    {id:"dsa-09",text:"Backtracking",n:10},
+    {id:"dsa-10",text:"Tries",n:3},
+    {id:"dsa-11",text:"Graphs",n:13},
+    {id:"dsa-12",text:"Advanced Graphs",n:6},
+    {id:"dsa-13",text:"1-D Dynamic Programming",n:12},
+    {id:"dsa-14",text:"2-D Dynamic Programming",n:11},
+    {id:"dsa-15",text:"Greedy",n:8},
+    {id:"dsa-16",text:"Intervals",n:6},
+    {id:"dsa-17",text:"Math & Geometry",n:8},
+    {id:"dsa-18",text:"Bit Manipulation",n:7},
+   ]},
+  {id:"hld",track:"hld",title:"HLD · Grokking Modern System Design",sub:"48 sections",unit:"sections",
+   items:[
+    {id:"hld-01",text:"1. Introduction",meta:"3 lessons",group:"Fundamentals & Concepts"},
+    {id:"hld-02",text:"2. System Design Interviews",meta:"6 lessons"},
+    {id:"hld-03",text:"3. Preliminary System Design Concepts",meta:"4 lessons"},
+    {id:"hld-04",text:"4. Non-Functional System Characteristics",meta:"7 lessons"},
+    {id:"hld-05",text:"5. Back-of-the-Envelope Calculations",meta:"2 lessons"},
+    {id:"hld-06",text:"6. Building Blocks",meta:"",group:"Building Blocks"},
+    {id:"hld-07",text:"7. Domain Name System",meta:"2 lessons"},
+    {id:"hld-08",text:"8. Load Balancers",meta:"3 lessons"},
+    {id:"hld-09",text:"9. Databases",meta:"5 lessons"},
+    {id:"hld-10",text:"10. Key-Value Store",meta:"5 lessons"},
+    {id:"hld-11",text:"11. Content Delivery Network (CDN)",meta:"7 lessons"},
+    {id:"hld-12",text:"12. Sequencer",meta:"3 lessons"},
+    {id:"hld-13",text:"13. Distributed Monitoring",meta:"3 lessons"},
+    {id:"hld-14",text:"14. Monitor Server-Side Errors",meta:"3 lessons"},
+    {id:"hld-15",text:"15. Monitor Client-Side Errors",meta:"2 lessons"},
+    {id:"hld-16",text:"16. Distributed Cache",meta:"6 lessons"},
+    {id:"hld-17",text:"17. Distributed Messaging Queue",meta:"7 lessons"},
+    {id:"hld-18",text:"18. Pub-Sub",meta:"3 lessons"},
+    {id:"hld-19",text:"19. Rate Limiter",meta:"5 lessons"},
+    {id:"hld-20",text:"20. Blob Store",meta:"6 lessons"},
+    {id:"hld-21",text:"21. Distributed Search",meta:"6 lessons"},
+    {id:"hld-22",text:"22. Distributed Logging",meta:"3 lessons"},
+    {id:"hld-23",text:"23. Distributed Task Scheduler",meta:"5 lessons"},
+    {id:"hld-24",text:"24. Sharded Counters",meta:"4 lessons"},
+    {id:"hld-25",text:"25. Concluding the Building Blocks Discussion",meta:"4 lessons"},
+    {id:"hld-26",text:"26. Design YouTube",meta:"6 lessons",group:"Real-World Systems (HLD)"},
+    {id:"hld-27",text:"27. Design Quora",meta:"5 lessons"},
+    {id:"hld-28",text:"28. Design Google Maps",meta:"6 lessons"},
+    {id:"hld-29",text:"29. Design a Proximity Service / Yelp",meta:"5 lessons"},
+    {id:"hld-30",text:"30. Design Uber",meta:"7 lessons"},
+    {id:"hld-31",text:"31. Design Twitter",meta:"6 lessons"},
+    {id:"hld-32",text:"32. Design Newsfeed System",meta:""},
+    {id:"hld-33",text:"33. Design Instagram",meta:"5 lessons"},
+    {id:"hld-34",text:"34. Design a URL Shortening Service / TinyURL",meta:""},
+    {id:"hld-35",text:"35. Design a Web Crawler",meta:""},
+    {id:"hld-36",text:"36. Design WhatsApp",meta:"6 lessons"},
+    {id:"hld-37",text:"37. Design Typeahead Suggestion",meta:"7 lessons"},
+    {id:"hld-38",text:"38. Design Collaborative Doc Editing / Google Docs",meta:"5 lessons"},
+    {id:"hld-39",text:"39. Design a Deployment System",meta:"2 lessons"},
+    {id:"hld-40",text:"40. Design a Payment System",meta:"2 lessons"},
+    {id:"hld-41",text:"41. Design a ChatGPT System",meta:"2 lessons"},
+    {id:"hld-42",text:"42. Design a Data Infrastructure System",meta:"3 lessons"},
+    {id:"hld-43",text:"43. LLM-Powered Customer Support Bot",meta:"2 lessons"},
+    {id:"hld-44",text:"44. AI-Powered Code Assistant",meta:"2 lessons"},
+    {id:"hld-45",text:"45. Lessons from System Failures",meta:"4 lessons",group:"Wrap-Up & Extras"},
+    {id:"hld-46",text:"46. Concluding Remarks",meta:"2 lessons"},
+    {id:"hld-47",text:"47. Free System Design Lessons",meta:"14 lessons"},
+    {id:"hld-48",text:"48. System Design Case Studies",meta:"5 lessons"},
+   ]},
+  {id:"lld",track:"lld",title:"LLD · Head First Design Patterns",sub:"14 chapters + appendix",unit:"chapters",
+   items:[
+    {id:"lld-00",text:"Intro: How to use this Book"},
+    {id:"lld-01",text:"1. Welcome to Design Patterns — Intro to Design Patterns"},
+    {id:"lld-02",text:"2. Keeping your Objects in the Know — Observer"},
+    {id:"lld-03",text:"3. Decorating Objects — Decorator"},
+    {id:"lld-04",text:"4. Baking with OO Goodness — Factory"},
+    {id:"lld-05",text:"5. One-of-a-Kind Objects — Singleton"},
+    {id:"lld-06",text:"6. Encapsulating Invocation — Command"},
+    {id:"lld-07",text:"7. Being Adaptive — Adapter & Facade"},
+    {id:"lld-08",text:"8. Encapsulating Algorithms — Template Method"},
+    {id:"lld-09",text:"9. Well-Managed Collections — Iterator & Composite"},
+    {id:"lld-10",text:"10. The State of Things — State"},
+    {id:"lld-11",text:"11. Controlling Object Access — Proxy"},
+    {id:"lld-12",text:"12. Patterns of Patterns — Compound Patterns"},
+    {id:"lld-13",text:"13. Patterns in the Real World — Better Living with Patterns"},
+    {id:"lld-A",text:"A. Leftover Patterns"},
+   ]},
+  {id:"lldbuild",track:"lld",sup:true,title:"LLD · Machine-Coding Practice",sub:"build each in Java, AI off",unit:"problems",
+   items:[
+    {id:"bld-1",text:"Parking Lot"},
+    {id:"bld-2",text:"Vending Machine"},
+    {id:"bld-3",text:"Elevator System"},
+    {id:"bld-4",text:"Splitwise"},
+    {id:"bld-5",text:"BookMyShow (movie booking)"},
+    {id:"bld-6",text:"Rate Limiter"},
+    {id:"bld-7",text:"Logging Framework"},
+    {id:"bld-8",text:"LRU Cache"},
+    {id:"bld-9",text:"Notification System"},
+    {id:"bld-10",text:"Tic-Tac-Toe / Snake & Ladder"},
+   ]},
+  {id:"core",track:"core",sup:true,title:"Java & Backend Core",sub:"language depth interviews drill",unit:"topics",
+   items:[
+    {id:"core-1",text:"Collections internals: HashMap, ConcurrentHashMap, ArrayList"},
+    {id:"core-2",text:"Multithreading + java.util.concurrent (Executors, locks, atomics)"},
+    {id:"core-3",text:"JVM memory model + garbage collection"},
+    {id:"core-4",text:"Spring Boot internals: DI, bean lifecycle, AOP"},
+    {id:"core-5",text:"@Transactional: isolation levels & propagation"},
+    {id:"core-6",text:"JPA/Hibernate: lazy loading, N+1, caching"},
+   ]},
+  {id:"proc",track:"proc",sup:true,title:"Process & Applications",sub:"the part that actually lands offers",unit:"steps",
+   items:[
+    {id:"proc-1",text:"Polish resume — lead with Deloitte distributed-systems work"},
+    {id:"proc-2",text:"Polish LinkedIn + build target-company shortlist"},
+    {id:"proc-3",text:"Start applications (by August)"},
+    {id:"proc-4",text:"Weekly mocks from September — alternate DSA / HLD"},
+    {id:"proc-5",text:"Keep a rejection log → convert each miss into a study item"},
+    {id:"proc-6",text:"STAR stories for your top 3 Deloitte projects"},
+    {id:"proc-7",text:"Negotiate & compare offers (December)"},
+   ]},
+  {id:"go",track:"go",sup:true,title:"Go (optional — only if targeting Go roles)",sub:"keep light",unit:"steps",
+   items:[
+    {id:"go-1",text:"Tour of Go — syntax, types, functions, structs"},
+    {id:"go-2",text:"Goroutines & channels"},
+    {id:"go-3",text:"Small Go CLI project"},
+   ]},
+];
+
+const STORAGE_KEY="backend_switch_prep_v2";
+let progress={};
+const $=s=>document.querySelector(s);
+const allItems=SECTIONS.flatMap(s=>s.items);
+
+async function loadProgress(){try{const r=await window.storage.get(STORAGE_KEY);if(r&&r.value)progress=JSON.parse(r.value);}catch(e){progress={};}}
+let saveTimer=null;
+async function saveProgress(){
+  $("#saveText").textContent="Saving…";
+  try{await window.storage.set(STORAGE_KEY,JSON.stringify(progress));
+    $("#saveText").textContent="Saved";clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{$("#saveText").textContent="All changes saved";},1200);
+  }catch(e){$("#saveText").textContent="Save failed — retry";}
+}
+
+function dsaProblems(){const s=SECTIONS[0];const done=s.items.filter(i=>progress[i.id]).reduce((a,i)=>a+i.n,0);return {done,total:150};}
+function secProgress(s){
+  const total=s.items.length;const done=s.items.filter(i=>progress[i.id]).length;
+  if(s.id==="dsa"){const p=dsaProblems();return {done,total,pct:Math.round(p.done/p.total*100),label:`${p.done}/150 problems · ${done}/${total} topics`};}
+  return {done,total,pct:total?Math.round(done/total*100):0,label:`${done}/${total} ${s.unit}`};
+}
+
+function renderTracks(){
+  const el=$("#tracks");el.innerHTML="";
+  ["dsa","hld","lld"].forEach(id=>{
+    const s=SECTIONS.find(x=>x.id===id);const p=secProgress(s);
+    const names={dsa:"DSA · NeetCode",hld:"HLD · Grokking",lld:"LLD · Head First"};
+    const d=document.createElement("div");
+    d.innerHTML=`<div class="trk-top"><span class="trk-name"><span class="dot" style="background:${COLORS[id]}"></span>${names[id]}</span><span class="trk-pct">${p.pct}%</span></div>
+      <div class="trk-bar"><i style="width:${p.pct}%;background:${COLORS[id]}"></i></div>`;
+    el.appendChild(d);
+  });
+}
+
+function renderPlan(){
+  const root=$("#plan");root.innerHTML="";
+  SECTIONS.forEach((s,idx)=>{
+    const p=secProgress(s);
+    const sec=document.createElement("div");
+    sec.className="section"+(s.sup?" sup":"")+(idx<3?" open":"");
+    sec.dataset.id=s.id;
+    let lastGroup=null;
+    const rows=s.items.map(it=>{
+      let head="";
+      if(it.group&&it.group!==lastGroup){lastGroup=it.group;head=`<div class="grp">${it.group}</div>`;}
+      const checked=progress[it.id]?"checked":"";
+      const meta=it.meta?`<span class="task-meta">${it.meta}</span>`:"";
+      return `${head}<div class="task ${progress[it.id]?'done':''}" data-track="${s.track}">
+        <input type="checkbox" class="cb" data-id="${it.id}" ${checked}>
+        <span class="task-text" data-id="${it.id}">${it.text}</span>${meta}</div>`;
+    }).join("");
+    sec.innerHTML=`
+      <div class="sec-head">
+        <span class="sec-bullet" style="background:${COLORS[s.track]}"></span>
+        <span class="sec-title">${s.title} <span class="tiny">· ${s.sub}</span></span>
+        <span class="sec-meta">${p.label}</span>
+        <span class="sec-chev">▸</span>
+      </div>
+      <div class="miniprog"><i style="width:${p.pct}%;background:${COLORS[s.track]}"></i></div>
+      <div class="sec-body">${rows}</div>`;
+    root.appendChild(sec);
+  });
+  wire();applyFilter();
+}
+
+function wire(){
+  document.querySelectorAll(".sec-head").forEach(h=>h.addEventListener("click",()=>h.parentElement.classList.toggle("open")));
+  document.querySelectorAll(".cb").forEach(cb=>cb.addEventListener("change",()=>toggle(cb.dataset.id,cb.checked)));
+  document.querySelectorAll(".task-text").forEach(tx=>tx.addEventListener("click",()=>{
+    const cb=document.querySelector(`.cb[data-id="${tx.dataset.id}"]`);cb.checked=!cb.checked;toggle(tx.dataset.id,cb.checked);
+  }));
+}
+
+function toggle(id,val){
+  if(val)progress[id]=true;else delete progress[id];
+  const task=document.querySelector(`.cb[data-id="${id}"]`).closest(".task");
+  task.classList.toggle("done",val);
+  document.querySelector(`.cb[data-id="${id}"]`).checked=val;
+  refreshSection(id);renderStats();renderTracks();saveProgress();
+}
+function refreshSection(id){
+  const secEl=document.querySelector(`.cb[data-id="${id}"]`).closest(".section");
+  const s=SECTIONS.find(x=>x.id===secEl.dataset.id);const p=secProgress(s);
+  secEl.querySelector(".sec-meta").textContent=p.label;
+  secEl.querySelector(".miniprog i").style.width=p.pct+"%";
+}
+function renderStats(){
+  const total=allItems.length;const done=allItems.filter(i=>progress[i.id]).length;
+  const pct=Math.round(done/total*100);
+  $("#bigPct").innerHTML=`${pct}<span>%</span>`;
+  $("#overallBar").style.width=pct+"%";
+  $("#doneCount").textContent=`${done} / ${total} items done`;
+}
+function renderCountdown(){
+  const target=new Date("2026-12-31T00:00:00");const now=new Date();
+  const days=Math.max(0,Math.ceil((target-now)/(864e5)));
+  $("#weeksLeft").textContent=Math.floor(days/7);
+  $("#daysLeft").textContent=days+" days remaining";
+}
+
+let activeFilter="all";
+function applyFilter(){
+  document.querySelectorAll(".task").forEach(t=>{
+    t.classList.toggle("hide",!(activeFilter==="all"||t.dataset.track===activeFilter));
+  });
+  document.querySelectorAll(".grp").forEach(g=>{
+    // hide a group header if no visible task follows before next group
+    let n=g.nextElementSibling,vis=false;
+    while(n&&!n.classList.contains("grp")){if(n.classList.contains("task")&&!n.classList.contains("hide")){vis=true;break;}n=n.nextElementSibling;}
+    g.style.display=vis?"":"none";
+  });
+  document.querySelectorAll(".section").forEach(sec=>{
+    const vis=[...sec.querySelectorAll(".task")].some(t=>!t.classList.contains("hide"));
+    sec.style.display=vis?"":"none";
+  });
+}
+$("#filter").addEventListener("click",e=>{
+  if(!e.target.classList.contains("chip"))return;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  e.target.classList.add("active");activeFilter=e.target.dataset.f;
+  if(activeFilter!=="all")document.querySelectorAll(".section").forEach(s=>s.classList.add("open"));
+  applyFilter();
+});
+$("#resetBtn").addEventListener("click",async()=>{
+  if(!confirm("Reset all progress? This clears every checkbox."))return;
+  progress={};try{await window.storage.delete(STORAGE_KEY);}catch(e){}
+  renderPlan();renderStats();renderTracks();
+});
+
+(async function init(){
+  $("#saveText").textContent="Loading…";
+  await loadProgress();renderCountdown();renderPlan();renderStats();renderTracks();
+  $("#saveText").textContent="All changes saved";
+})();
+</script>
+</body>
+</html>
