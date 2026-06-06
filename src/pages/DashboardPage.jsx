@@ -12,9 +12,12 @@ import AddSectionModal from '../components/AddSectionModal';
 import AddItemModal from '../components/AddItemModal';
 import ShareModal from '../components/ShareModal';
 import LinkImportModal from '../components/LinkImportModal';
+import LiveUsers from '../components/LiveUsers';
+import { usePresence } from '../hooks/usePresence';
 
-export default function DashboardPage({ userId, onSignOut }) {
+export default function DashboardPage({ userId, email, onSignOut }) {
   const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
+  const liveUsers = usePresence(userId, username, email);
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [openSections, setOpenSections] = useState(() => new Set());
@@ -93,6 +96,7 @@ export default function DashboardPage({ userId, onSignOut }) {
   return (
     <div className="wrap">
       <Header />
+      <LiveUsers users={liveUsers} currentUserId={userId} />
       <Dashboard sections={sections} progress={progress} />
       <TrackBars sections={sections} progress={progress} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />

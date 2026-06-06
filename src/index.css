@@ -222,3 +222,17 @@ h1 .slash { color: var(--faint); font-weight: 400; }
 .swatch { width: 26px; height: 26px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; padding: 0; transition: .15s; }
 .swatch:hover { transform: scale(1.15); }
 .swatch.active { border-color: var(--text); outline: 2px solid var(--text); outline-offset: 2px; }
+
+/* ── Live Users ──────────────────────────────── */
+.live-users { margin-bottom: 18px; }
+.live-users-toggle { display: inline-flex; align-items: center; gap: 7px; background: none; border: 1px solid var(--line); border-radius: 20px; padding: 5px 12px; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; transition: .15s; }
+.live-users-toggle:hover { border-color: var(--faint); color: var(--text); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; flex-shrink: 0; box-shadow: 0 0 6px #4ade8088; }
+.live-chevron { font-size: 9px; margin-left: 2px; }
+.live-users-list { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 4px; }
+.live-user-row { display: flex; align-items: center; gap: 9px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+.live-user-self { border-color: rgba(74, 222, 128, .25); background: rgba(74, 222, 128, .04); }
+.live-user-info { display: flex; flex-direction: column; gap: 1px; }
+.live-user-name { font-family: var(--mono); font-size: 12px; color: var(--text); }
+.live-user-name em { font-style: normal; color: var(--muted); font-size: 10px; }
+.live-user-email { font-size: 11px; color: var(--faint); }
