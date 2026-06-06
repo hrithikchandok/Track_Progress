@@ -1,15 +1,20 @@
-export const COLORS = {
-  dsa: 'var(--dsa)',
-  hld: 'var(--hld)',
-  lld: 'var(--lld)',
-  core: 'var(--core)',
-  proc: 'var(--proc)',
-  go: 'var(--go)',
-};
+export const PRESET_COLORS = [
+  '#f5b544', // amber
+  '#a78bfa', // violet
+  '#43d6c4', // teal
+  '#f87171', // red
+  '#9ad36a', // green
+  '#5fb4e8', // blue
+  '#f472b6', // pink
+  '#fb923c', // orange
+  '#818cf8', // indigo
+  '#34d399', // emerald
+];
 
 export const SECTIONS = [
   {
-    id: 'dsa', track: 'dsa', title: 'DSA · NeetCode 150', sub: '150 problems · 18 topics', unit: 'problems',
+    id: 'dsa', track: 'dsa', color: '#f5b544',
+    title: 'DSA · NeetCode 150', sub: '150 problems · 18 topics', unit: 'problems',
     items: [
       { id: 'dsa-01', text: 'Arrays & Hashing', n: 9 },
       { id: 'dsa-02', text: 'Two Pointers', n: 5 },
@@ -32,7 +37,8 @@ export const SECTIONS = [
     ],
   },
   {
-    id: 'hld', track: 'hld', title: 'HLD · Grokking Modern System Design', sub: '48 sections', unit: 'sections',
+    id: 'hld', track: 'hld', color: '#a78bfa',
+    title: 'HLD · Grokking Modern System Design', sub: '48 sections', unit: 'sections',
     items: [
       { id: 'hld-01', text: '1. Introduction', meta: '3 lessons', group: 'Fundamentals & Concepts' },
       { id: 'hld-02', text: '2. System Design Interviews', meta: '6 lessons' },
@@ -85,7 +91,8 @@ export const SECTIONS = [
     ],
   },
   {
-    id: 'lld', track: 'lld', title: 'LLD · Head First Design Patterns', sub: '14 chapters + appendix', unit: 'chapters',
+    id: 'lld', track: 'lld', color: '#43d6c4',
+    title: 'LLD · Head First Design Patterns', sub: '14 chapters + appendix', unit: 'chapters',
     items: [
       { id: 'lld-00', text: 'Intro: How to use this Book' },
       { id: 'lld-01', text: '1. Welcome to Design Patterns — Intro to Design Patterns' },
@@ -105,7 +112,8 @@ export const SECTIONS = [
     ],
   },
   {
-    id: 'lldbuild', track: 'lld', sup: true, title: 'LLD · Machine-Coding Practice', sub: 'build each in Java, AI off', unit: 'problems',
+    id: 'lldbuild', track: 'lld', color: '#43d6c4', sup: true,
+    title: 'LLD · Machine-Coding Practice', sub: 'build each in Java, AI off', unit: 'problems',
     items: [
       { id: 'bld-1', text: 'Parking Lot' },
       { id: 'bld-2', text: 'Vending Machine' },
@@ -120,7 +128,8 @@ export const SECTIONS = [
     ],
   },
   {
-    id: 'core', track: 'core', sup: true, title: 'Java & Backend Core', sub: 'language depth interviews drill', unit: 'topics',
+    id: 'core', track: 'core', color: '#f87171', sup: true,
+    title: 'Java & Backend Core', sub: 'language depth interviews drill', unit: 'topics',
     items: [
       { id: 'core-1', text: 'Collections internals: HashMap, ConcurrentHashMap, ArrayList' },
       { id: 'core-2', text: 'Multithreading + java.util.concurrent (Executors, locks, atomics)' },
@@ -131,7 +140,8 @@ export const SECTIONS = [
     ],
   },
   {
-    id: 'proc', track: 'proc', sup: true, title: 'Process & Applications', sub: 'the part that actually lands offers', unit: 'steps',
+    id: 'proc', track: 'proc', color: '#9ad36a', sup: true,
+    title: 'Process & Applications', sub: 'the part that actually lands offers', unit: 'steps',
     items: [
       { id: 'proc-1', text: 'Polish resume — lead with Deloitte distributed-systems work' },
       { id: 'proc-2', text: 'Polish LinkedIn + build target-company shortlist' },
@@ -143,7 +153,8 @@ export const SECTIONS = [
     ],
   },
   {
-    id: 'go', track: 'go', sup: true, title: 'Go (optional — only if targeting Go roles)', sub: 'keep light', unit: 'steps',
+    id: 'go', track: 'go', color: '#5fb4e8', sup: true,
+    title: 'Go (optional — only if targeting Go roles)', sub: 'keep light', unit: 'steps',
     items: [
       { id: 'go-1', text: 'Tour of Go — syntax, types, functions, structs' },
       { id: 'go-2', text: 'Goroutines & channels' },

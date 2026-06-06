@@ -1,12 +1,9 @@
 import { useRef } from 'react';
 
-export default function Footer({ saveText, syncOn, canEdit, onExport, onImport, onReset, onAuthClick }) {
+export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, onExport, onImport, onReset, onSignOut }) {
   const fileRef = useRef(null);
 
-  function handleImportClick() {
-    fileRef.current?.click();
-  }
-
+  function handleImportClick() { fileRef.current?.click(); }
   function handleFileChange(e) {
     const file = e.target.files[0];
     if (file) onImport(file);
@@ -21,18 +18,17 @@ export default function Footer({ saveText, syncOn, canEdit, onExport, onImport, 
           <span>{saveText}</span>
         </div>
         <div className="foot-btns">
-          {syncOn && (
-            <button className="btn" onClick={onAuthClick}>
-              {canEdit ? 'Sign out' : 'Owner sign-in'}
-            </button>
-          )}
-          <button className="btn" onClick={onExport}>Export backup</button>
-          <button className="btn" onClick={handleImportClick}>Import backup</button>
-          <button className="btn danger" onClick={onReset}>Reset all</button>
+          <button className={`btn${isEditMode ? ' btn-active' : ''}`} onClick={onToggleEdit}>
+            {isEditMode ? 'Done editing' : 'Edit sections'}
+          </button>
+          <button className="btn" onClick={onShare}>Share</button>
+          <button className="btn" onClick={onExport}>Export</button>
+          <button className="btn" onClick={handleImportClick}>Import</button>
+          <button className="btn danger" onClick={onReset}>Reset</button>
+          <button className="btn" onClick={onSignOut}>Sign out</button>
           <input type="file" ref={fileRef} accept="application/json" hidden onChange={handleFileChange} />
         </div>
       </div>
-
       <p className="note">
         NeetCode 150 · Grokking Modern System Design Interview · Head First Design Patterns
         <br />

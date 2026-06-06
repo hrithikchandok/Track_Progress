@@ -1,16 +1,14 @@
-import { COLORS } from '../data/sections';
-import { secProgress } from '../hooks/useProgress';
+import { secProgress } from '../utils/progress';
 import TaskItem from './TaskItem';
 
-export default function Section({ section, progress, isOpen, activeFilter, canEdit, onToggle, onSectionToggle }) {
+export default function Section({ section, progress, isOpen, activeFilter, canEdit, isEditMode, onToggle, onSectionToggle, onDeleteSection, onAddItem, onDeleteItem }) {
   const { pct, label } = secProgress(section, progress);
+  const isVisible = activeFilter === 'all' || section.track === activeFilter;
+  if (!isVisible) return null;
 
-  // Build item list with group headers.
-  // Filtering is track-level: all items in a section share the same track,
-  // so if the section is visible, all its tasks and group headers are visible.
   const rows = [];
   let lastGroup = null;
-  for (const item of section.items) {
+  for (const item of section.items || []) {
     if (item.group && item.group !== lastGroup) {
       lastGroup = item.group;
       rows.push(<div key={`grp-${item.group}`} className="grp">{item.group}</div>);
@@ -21,32 +19,41 @@ export default function Section({ section, progress, isOpen, activeFilter, canEd
         item={item}
         done={!!progress[item.id]}
         track={section.track}
-        visible={true}
         canEdit={canEdit}
+        isEditMode={isEditMode}
         onToggle={onToggle}
+        onDelete={isEditMode ? () => onDeleteItem(section.id, item.id) : undefined}
       />
     );
   }
 
-  // Hide whole section if no visible tasks
-  const hasVisible = activeFilter === 'all' || section.track === activeFilter;
-  if (!hasVisible) return null;
-
   return (
     <div className={`section${section.sup ? ' sup' : ''}${isOpen ? ' open' : ''}`} data-id={section.id}>
-      <div className="sec-head" onClick={() => onSectionToggle(section.id)}>
-        <span className="sec-bullet" style={{ background: COLORS[section.track] }}></span>
+      <div className="sec-head" onClick={() => !isEditMode && onSectionToggle(section.id)}>
+        <span className="sec-bullet" style={{ background: section.color }}></span>
         <span className="sec-title">
           {section.title} <span className="tiny">· {section.sub}</span>
         </span>
         <span className="sec-meta">{label}</span>
-        <span className="sec-chev">▸</span>
+        {isEditMode ? (
+          <div className="edit-actions" onClick={e => e.stopPropagation()}>
+            <button className="edit-btn" onClick={() => onAddItem(section.id)} title="Add item">+ item</button>
+            <button className="edit-btn danger" onClick={() => onDeleteSection(section.id)} title="Delete section">delete</button>
+          </div>
+        ) : (
+          <span className="sec-chev">▸</span>
+        )}
       </div>
       <div className="miniprog">
-        <i style={{ width: `${pct}%`, background: COLORS[section.track] }}></i>
+        <i style={{ width: `${pct}%`, background: section.color }}></i>
       </div>
       <div className="sec-body">
         {rows}
+        {isEditMode && (
+          <button className="add-item-inline" onClick={() => onAddItem(section.id)}>
+            + Add item
+          </button>
+        )}
       </div>
     </div>
   );

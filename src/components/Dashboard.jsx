@@ -1,8 +1,11 @@
-import { overallStats, countdown } from '../hooks/useProgress';
+import { overallStats, countdown } from '../utils/progress';
 
-export default function Dashboard({ progress }) {
-  const { done, total, pct } = overallStats(progress);
-  const { weeks, days } = countdown();
+export default function Dashboard({ sections, progress, targetDate }) {
+  const { done, total, pct } = overallStats(sections, progress);
+  const { weeks, days } = countdown(targetDate);
+  const dateLabel = targetDate
+    ? new Date(targetDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : '31 Dec 2026';
 
   return (
     <div className="dash">
@@ -23,7 +26,7 @@ export default function Dashboard({ progress }) {
         <div className="cd-sub">Weeks until target</div>
         <div className="cd-num">{weeks}</div>
         <div className="cd-sub">{days} days remaining</div>
-        <div className="cd-target">Target&nbsp;·&nbsp;31&nbsp;Dec&nbsp;2026</div>
+        <div className="cd-target">Target&nbsp;·&nbsp;{dateLabel}</div>
       </div>
     </div>
   );
