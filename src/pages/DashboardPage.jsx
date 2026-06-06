@@ -15,9 +15,9 @@ import LinkImportModal from '../components/LinkImportModal';
 import LiveUsers from '../components/LiveUsers';
 import { usePresence } from '../hooks/usePresence';
 
-export default function DashboardPage({ userId, email, onSignOut }) {
+export default function DashboardPage({ userId, onSignOut }) {
   const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
-  const liveUsers = usePresence(userId, username, email);
+  const liveCount = usePresence(userId);
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [openSections, setOpenSections] = useState(() => new Set());
@@ -96,7 +96,7 @@ export default function DashboardPage({ userId, email, onSignOut }) {
   return (
     <div className="wrap">
       <Header />
-      <LiveUsers users={liveUsers} currentUserId={userId} />
+      <LiveUsers count={liveCount} />
       <Dashboard sections={sections} progress={progress} />
       <TrackBars sections={sections} progress={progress} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />

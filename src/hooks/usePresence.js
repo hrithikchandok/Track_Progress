@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { sb } from '../lib/supabase';
 
-export function usePresence(userId, username, email) {
-  const [liveUsers, setLiveUsers] = useState([]);
+export function usePresence(userId) {
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!userId || !username) return;
+    if (!userId) return;
 
     const channel = sb.channel('global-presence', {
       config: { presence: { key: userId } },
@@ -13,20 +13,16 @@ export function usePresence(userId, username, email) {
 
     channel
       .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const users = Object.values(state)
-          .flat()
-          .map(u => ({ userId: u.userId, username: u.username, email: u.email }));
-        setLiveUsers(users);
+        setCount(Object.keys(channel.presenceState()).length);
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          await channel.track({ userId, username, email });
+          await channel.track({ userId });
         }
       });
 
     return () => { sb.removeChannel(channel); };
-  }, [userId, username, email]);
+  }, [userId]);
 
-  return liveUsers;
+  return count;
 }

@@ -7,7 +7,7 @@ import PublicPage from './pages/PublicPage';
 function AuthGate({ session, loading, signIn, signUp, signOut }) {
   if (loading) return <div className="wrap" style={{ paddingTop: 80 }}><p className="sub">Loading…</p></div>;
   if (!session) return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
-  return <DashboardPage userId={session.user.id} email={session.user.email} onSignOut={signOut} />;
+  return <DashboardPage userId={session.user.id} onSignOut={signOut} />;
 }
 
 export default function App() {
