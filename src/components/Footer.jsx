@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, onExport, onImport, onReset, onSignOut }) {
+export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, onExport, onImport, onImportFromLink, onReset, onSignOut }) {
   const fileRef = useRef(null);
 
   function handleImportClick() { fileRef.current?.click(); }
@@ -24,6 +24,7 @@ export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, on
           <button className="btn" onClick={onShare}>Share</button>
           <button className="btn" onClick={onExport}>Export</button>
           <button className="btn" onClick={handleImportClick}>Import</button>
+          <button className="btn" onClick={onImportFromLink}>Import from link</button>
           <button className="btn danger" onClick={onReset}>Reset all</button>
           <button className="btn" onClick={onSignOut}>Sign out</button>
           <input type="file" ref={fileRef} accept="application/json" hidden onChange={handleFileChange} />

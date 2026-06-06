@@ -11,6 +11,7 @@ import OnboardingModal from '../components/OnboardingModal';
 import AddSectionModal from '../components/AddSectionModal';
 import AddItemModal from '../components/AddItemModal';
 import ShareModal from '../components/ShareModal';
+import LinkImportModal from '../components/LinkImportModal';
 
 export default function DashboardPage({ userId, onSignOut }) {
   const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
@@ -20,6 +21,7 @@ export default function DashboardPage({ userId, onSignOut }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
+  const [showLinkImport, setShowLinkImport] = useState(false);
   const [addItemTo, setAddItemTo] = useState(null);
 
   // Auto-open first 3 sections whenever sections first load or are replaced by import
@@ -46,6 +48,10 @@ export default function DashboardPage({ userId, onSignOut }) {
     const newSection = { ...sectionData, id: genId() };
     update([...sections, newSection], progress);
     setShowAddSection(false);
+  }
+
+  function handleLinkImport(section) {
+    update([...sections, section], progress);
   }
 
   function handleDeleteSection(sectionId) {
@@ -113,11 +119,13 @@ export default function DashboardPage({ userId, onSignOut }) {
         onShare={() => setShowShareModal(true)}
         onExport={exportProgress}
         onImport={file => importBackup(file)}
+        onImportFromLink={() => setShowLinkImport(true)}
         onReset={resetAll}
         onSignOut={onSignOut}
       />
 
       {showShareModal && <ShareModal currentUsername={username} onSave={saveUsername} onClose={() => setShowShareModal(false)} />}
+      {showLinkImport && <LinkImportModal onImport={handleLinkImport} onClose={() => setShowLinkImport(false)} />}
       {showAddSection && <AddSectionModal onAdd={handleAddSection} onClose={() => setShowAddSection(false)} />}
       {addItemTo && <AddItemModal sectionTitle={targetSection?.title || ''} onAdd={item => handleAddItem(addItemTo, item)} onClose={() => setAddItemTo(null)} />}
     </div>
