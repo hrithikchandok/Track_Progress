@@ -27,7 +27,7 @@ export function normalizeImport(parsed) {
       sub:   s.sub   || s.subtitle || '',
       unit:  s.unit  || 'items',
       color: s.color || PRESET_COLORS[idx % PRESET_COLORS.length],
-      track: s.track || s.id || `section-${idx}`,
+      track: (s.track || s.id || `section-${idx}`).toString(),
       sup:   s.sup   || false,
       items,
     };

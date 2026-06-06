@@ -3,9 +3,10 @@ export default function FilterBar({ sections, activeFilter, onFilterChange }) {
   const seen = new Set();
   const chips = [{ key: 'all', label: 'All' }];
   for (const s of sections) {
-    if (!seen.has(s.track)) {
-      seen.add(s.track);
-      chips.push({ key: s.track, label: s.track.toUpperCase(), color: s.color });
+    const track = s.track || s.id || '';
+    if (track && !seen.has(track)) {
+      seen.add(track);
+      chips.push({ key: track, label: track.toUpperCase(), color: s.color });
     }
   }
 
