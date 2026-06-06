@@ -4,7 +4,6 @@ import { TEMPLATES } from '../data/templates';
 export default function OnboardingModal({ onSetup }) {
   const [selectedTemplate, setSelectedTemplate] = useState('backend-switch');
   const [username, setUsername] = useState('');
-  const [targetDate, setTargetDate] = useState('2026-12-31');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -15,7 +14,6 @@ export default function OnboardingModal({ onSetup }) {
     const { error: err } = await onSetup({
       selectedSections: template.sections,
       usernameStr: username.trim() || null,
-      date: targetDate,
     });
     if (err) {
       setError(err.message);
@@ -59,15 +57,6 @@ export default function OnboardingModal({ onSetup }) {
           onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
           className="auth-input"
           style={{ marginBottom: 16 }}
-        />
-
-        <div className="kicker" style={{ marginBottom: 8 }}>Target date</div>
-        <input
-          type="date"
-          value={targetDate}
-          onChange={e => setTargetDate(e.target.value)}
-          className="auth-input"
-          style={{ marginBottom: 20 }}
         />
 
         {error && <div className="modal-err" style={{ marginBottom: 10 }}>{error}</div>}

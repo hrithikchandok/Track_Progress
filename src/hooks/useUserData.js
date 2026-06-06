@@ -5,7 +5,6 @@ export function useUserData(userId) {
   const [sections, setSections] = useState([]);
   const [progress, setProgress] = useState({});
   const [username, setUsername] = useState('');
-  const [targetDate, setTargetDate] = useState('2026-12-31');
   const [initialized, setInitialized] = useState(null); // null=loading, false=needs onboarding, true=ready
   const [saveText, setSaveText] = useState('Loading…');
 
@@ -24,7 +23,7 @@ export function useUserData(userId) {
   useEffect(() => {
     if (!userId) return;
     sb.from('tracker_progress')
-      .select('sections, progress, username, target_date')
+      .select('sections, progress, username')
       .eq('id', userId)
       .maybeSingle()
       .then(({ data }) => {
@@ -34,7 +33,6 @@ export function useUserData(userId) {
           setSections(s);
           setProgress(p);
           setUsername(data.username || '');
-          setTargetDate(data.target_date || '2026-12-31');
           setInitialized(true);
           setSaveText('All changes saved');
         } else {
@@ -75,20 +73,18 @@ export function useUserData(userId) {
     persist(newSections, newProgress);
   }, [persist]);
 
-  const setupUser = useCallback(async ({ selectedSections, usernameStr, date }) => {
+  const setupUser = useCallback(async ({ selectedSections, usernameStr }) => {
     const { error } = await sb.from('tracker_progress').insert({
       id: userId,
       sections: selectedSections,
       progress: {},
       username: usernameStr || null,
-      target_date: date || '2026-12-31',
       updated_at: new Date().toISOString(),
     });
     if (!error) {
       setSections(selectedSections);
       setProgress({});
       setUsername(usernameStr || '');
-      setTargetDate(date || '2026-12-31');
       setInitialized(true);
       setSaveText('All changes saved');
     }
@@ -139,7 +135,7 @@ export function useUserData(userId) {
   }, [persist]);
 
   return {
-    sections, progress, username, targetDate, initialized, saveText,
+    sections, progress, username, initialized, saveText,
     toggle, update, setupUser, saveUsername, resetProgress, exportProgress, importBackup,
   };
 }

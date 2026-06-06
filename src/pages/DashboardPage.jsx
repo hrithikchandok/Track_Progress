@@ -13,7 +13,7 @@ import AddItemModal from '../components/AddItemModal';
 import ShareModal from '../components/ShareModal';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, targetDate, initialized, saveText, toggle, update, setupUser, saveUsername, resetProgress, exportProgress, importBackup } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetProgress, exportProgress, importBackup } = useUserData(userId);
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [openSections, setOpenSections] = useState(() => new Set());
@@ -86,7 +86,7 @@ export default function DashboardPage({ userId, onSignOut }) {
   return (
     <div className="wrap">
       <Header />
-      <Dashboard sections={sections} progress={progress} targetDate={targetDate} />
+      <Dashboard sections={sections} progress={progress} />
       <TrackBars sections={sections} progress={progress} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
       <SectionList

@@ -1,11 +1,9 @@
 import { overallStats, countdown } from '../utils/progress';
 
-export default function Dashboard({ sections, progress, targetDate }) {
+export default function Dashboard({ sections, progress }) {
   const { done, total, pct } = overallStats(sections, progress);
-  const { weeks, days } = countdown(targetDate);
-  const dateLabel = targetDate
-    ? new Date(targetDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '31 Dec 2026';
+  const { weeks, days } = countdown();
+  const dateLabel = '31 Dec 2026';
 
   return (
     <div className="dash">
