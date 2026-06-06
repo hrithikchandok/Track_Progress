@@ -1,6 +1,3 @@
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
-
 function stripHtml(html) {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -21,6 +18,9 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const GEMINI_KEY = process.env.GEMINI_API_KEY;
+  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Missing url parameter' });
