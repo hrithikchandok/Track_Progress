@@ -1,15 +1,19 @@
 import { genId, slugify } from './id';
 
-const PROXY = 'https://api.allorigins.win/get?url=';
-
 async function proxyFetch(url) {
-  const res = await fetch(`${PROXY}${encodeURIComponent(url)}`);
-  if (!res.ok) throw new Error(`Proxy error ${res.status}`);
-  const json = await res.json();
-  if (json.status?.http_code && json.status.http_code >= 400) {
-    throw new Error(`Remote returned ${json.status.http_code}`);
+  // In production Vercel uses its own serverless function — no third-party dependency.
+  // In local dev (import.meta.env.DEV) the /api route isn't running, so fall back to allorigins.
+  if (import.meta.env.DEV) {
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    if (!res.ok) throw new Error(`Proxy error ${res.status}`);
+    const json = await res.json();
+    if (json.status?.http_code >= 400) throw new Error(`Remote returned ${json.status.http_code}`);
+    return json.contents ?? '';
   }
-  return json.contents ?? '';
+
+  const res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`);
+  if (!res.ok) throw new Error(`Proxy error ${res.status}`);
+  return res.text();
 }
 
 export async function fetchSectionFromUrl(rawUrl) {
