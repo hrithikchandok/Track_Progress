@@ -24,7 +24,7 @@ export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, on
           <button className="btn" onClick={onShare}>Share</button>
           <button className="btn" onClick={onExport}>Export</button>
           <button className="btn" onClick={handleImportClick}>Import</button>
-          <button className="btn danger" onClick={onReset}>Reset</button>
+          <button className="btn danger" onClick={onReset}>Reset all</button>
           <button className="btn" onClick={onSignOut}>Sign out</button>
           <input type="file" ref={fileRef} accept="application/json" hidden onChange={handleFileChange} />
         </div>

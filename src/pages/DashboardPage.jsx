@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useUserData } from '../hooks/useUserData';
 import { genId } from '../utils/id';
 import Header from '../components/Header';
@@ -13,27 +13,28 @@ import AddItemModal from '../components/AddItemModal';
 import ShareModal from '../components/ShareModal';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetProgress, exportProgress, importBackup } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [openSections, setOpenSections] = useState(() => new Set());
   const [isEditMode, setIsEditMode] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
-  const [addItemTo, setAddItemTo] = useState(null); // section id
+  const [addItemTo, setAddItemTo] = useState(null);
 
-  // Open first 3 sections once sections load
-  const defaultOpenSet = useMemo(() => new Set(sections.slice(0, 3).map(s => s.id)), [sections.length > 0 && sections[0]?.id]);
-
-  function getOpenSections() {
-    return openSections.size === 0 && sections.length > 0 ? defaultOpenSet : openSections;
-  }
+  // Auto-open first 3 sections whenever sections first load or are replaced by import
+  useEffect(() => {
+    if (sections.length > 0) {
+      setOpenSections(new Set(sections.slice(0, 3).map(s => s.id)));
+    }
+  }, [sections.length === 0 ? 0 : sections[0]?.id]);
 
   function handleSectionToggle(id) {
-    const current = getOpenSections();
-    const next = new Set(current);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    setOpenSections(next);
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   }
 
   function handleFilterChange(filter) {
@@ -92,7 +93,7 @@ export default function DashboardPage({ userId, onSignOut }) {
       <SectionList
         sections={sections}
         progress={progress}
-        openSections={getOpenSections()}
+        openSections={openSections}
         activeFilter={activeFilter}
         canEdit={true}
         isEditMode={isEditMode}
@@ -111,8 +112,8 @@ export default function DashboardPage({ userId, onSignOut }) {
         onToggleEdit={() => setIsEditMode(v => !v)}
         onShare={() => setShowShareModal(true)}
         onExport={exportProgress}
-        onImport={importBackup}
-        onReset={resetProgress}
+        onImport={file => importBackup(file, () => setOpenSections(new Set(sections.slice(0, 3).map(s => s.id))))}
+        onReset={resetAll}
         onSignOut={onSignOut}
       />
 

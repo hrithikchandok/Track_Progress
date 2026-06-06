@@ -100,12 +100,15 @@ export function useUserData(userId) {
     return { error };
   }, [userId]);
 
-  const resetProgress = useCallback(() => {
-    if (!confirm('Reset all progress? This clears every checkbox.')) return;
-    const empty = {};
-    setProgress(empty);
-    persist(sectionsRef.current, empty);
-  }, [persist]);
+  const resetAll = useCallback(async () => {
+    if (!confirm('Delete all sections and progress? You will go back to the setup screen.')) return;
+    await sb.from('tracker_progress').delete().eq('id', userId);
+    setSections([]);
+    setProgress({});
+    setUsername('');
+    setInitialized(false);
+    setSaveText('');
+  }, [userId]);
 
   const exportProgress = useCallback(() => {
     const blob = new Blob([JSON.stringify({ sections: sectionsRef.current, progress: progressRef.current }, null, 2)], { type: 'application/json' });
@@ -116,7 +119,7 @@ export function useUserData(userId) {
     URL.revokeObjectURL(a.href);
   }, []);
 
-  const importBackup = useCallback((file) => {
+  const importBackup = useCallback((file, onSuccess) => {
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -126,6 +129,7 @@ export function useUserData(userId) {
         setSections(s);
         setProgress(p);
         persist(s, p);
+        onSuccess?.();
       } catch (_) {
         alert('Could not read that file.');
       }
@@ -135,6 +139,6 @@ export function useUserData(userId) {
 
   return {
     sections, progress, username, initialized, saveText,
-    toggle, update, setupUser, saveUsername, resetProgress, exportProgress, importBackup,
+    toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup,
   };
 }
