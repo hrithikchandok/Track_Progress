@@ -4,24 +4,24 @@ import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import PublicPage from './pages/PublicPage';
 
-function AuthGate({ session, loading, signIn, signOut }) {
+function AuthGate({ session, loading, signIn, signUp, signOut }) {
   if (loading) return <div className="wrap" style={{ paddingTop: 80 }}><p className="sub">Loading…</p></div>;
-  if (!session) return <AuthPage onSignIn={signIn} />;
+  if (!session) return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
   return <DashboardPage userId={session.user.id} onSignOut={signOut} />;
 }
 
 export default function App() {
-  const { session, loading, signIn, signOut } = useAuth();
+  const { session, loading, signIn, signUp, signOut } = useAuth();
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/u/:username" element={<PublicPage />} />
         <Route path="/login" element={
-          session ? <Navigate to="/" replace /> : <AuthPage onSignIn={signIn} />
+          session ? <Navigate to="/" replace /> : <AuthPage onSignIn={signIn} onSignUp={signUp} />
         } />
         <Route path="/*" element={
-          <AuthGate session={session} loading={loading} signIn={signIn} signOut={signOut} />
+          <AuthGate session={session} loading={loading} signIn={signIn} signUp={signUp} signOut={signOut} />
         } />
       </Routes>
     </BrowserRouter>

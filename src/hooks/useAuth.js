@@ -23,9 +23,15 @@ export function useAuth() {
     return { error };
   }
 
+  async function signUp(email, password) {
+    const { data, error } = await sb.auth.signUp({ email, password });
+    // data.session is null when email confirmation is required
+    return { needsConfirmation: !error && !data.session, error };
+  }
+
   async function signOut() {
     await sb.auth.signOut();
   }
 
-  return { session, loading, signIn, signOut };
+  return { session, loading, signIn, signUp, signOut };
 }

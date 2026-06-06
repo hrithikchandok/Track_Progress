@@ -53,6 +53,11 @@ body {
   width: 100%;
   max-width: 420px;
 }
+.auth-tabs { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 4px; }
+.auth-tab { flex: 1; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 9px; background: transparent; border: none; color: var(--muted); cursor: pointer; transition: .15s; }
+.auth-tab:hover { color: var(--text); }
+.auth-tab.active { background: var(--panel-2); color: var(--text); font-weight: 700; }
+
 .auth-input {
   width: 100%;
   background: var(--panel-2);

@@ -1,5 +1,15 @@
 import { useState } from 'react';
 import { TEMPLATES } from '../data/templates';
+import { SAMPLE_PAYLOAD } from '../data/samplePayload';
+
+function downloadSample() {
+  const blob = new Blob([JSON.stringify(SAMPLE_PAYLOAD, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sample-tracker-data.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 export default function OnboardingModal({ onSetup }) {
   const [selectedTemplate, setSelectedTemplate] = useState('backend-switch');
@@ -26,10 +36,12 @@ export default function OnboardingModal({ onSetup }) {
       <div className="modal-card" style={{ maxWidth: 480 }}>
         <div className="kicker" style={{ marginBottom: 8 }}>Welcome</div>
         <h3 style={{ fontSize: 18, marginBottom: 4 }}>Set up your tracker</h3>
-        <p style={{ marginBottom: 20 }}>Pick a starting template — you can add, remove, and customise everything later.</p>
+        <p style={{ marginBottom: 20 }}>
+          Pick a starting template, or start blank and upload your own data after setup.
+        </p>
 
         <div className="kicker" style={{ marginBottom: 10 }}>Starting template</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
           {TEMPLATES.map(t => (
             <label key={t.id} className={`template-option${selectedTemplate === t.id ? ' selected' : ''}`}>
               <input
@@ -46,9 +58,26 @@ export default function OnboardingModal({ onSetup }) {
           ))}
         </div>
 
+        {/* Sample data download */}
+        <div style={{ padding: '10px 14px', border: '1px dashed var(--line)', borderRadius: 8, marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--faint)', marginBottom: 2 }}>
+              Want to use your own data?
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+              Start blank, then import a JSON file from the footer. Download the sample to see the exact format.
+            </div>
+          </div>
+          <button className="btn" style={{ whiteSpace: 'nowrap', flexShrink: 0 }} onClick={downloadSample}>
+            ↓ Sample JSON
+          </button>
+        </div>
+
         <div className="kicker" style={{ marginBottom: 8 }}>Public username (optional)</div>
         <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
-          Set a username to get a shareable link — e.g. <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)' }}>yoursite.com/u/you</span>. Leave blank to keep your tracker private.
+          Get a shareable read-only link — e.g.{' '}
+          <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)' }}>yoursite.com/u/you</span>.
+          Leave blank to keep it private.
         </p>
         <input
           type="text"
