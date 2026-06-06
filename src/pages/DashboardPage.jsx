@@ -112,7 +112,7 @@ export default function DashboardPage({ userId, onSignOut }) {
         onToggleEdit={() => setIsEditMode(v => !v)}
         onShare={() => setShowShareModal(true)}
         onExport={exportProgress}
-        onImport={file => importBackup(file, () => setOpenSections(new Set(sections.slice(0, 3).map(s => s.id))))}
+        onImport={file => importBackup(file)}
         onReset={resetAll}
         onSignOut={onSignOut}
       />

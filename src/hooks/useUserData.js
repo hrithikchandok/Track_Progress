@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { sb } from '../lib/supabase';
 import { normalizeImport } from '../utils/importNormalizer';
+import { genId } from '../utils/id';
 
 export function useUserData(userId) {
   const [sections, setSections] = useState([]);
@@ -125,10 +126,14 @@ export function useUserData(userId) {
       try {
         const parsed = JSON.parse(reader.result);
         if (!Array.isArray(parsed.sections)) { alert('Invalid backup file — expected a "sections" array.'); return; }
-        const { sections: s, progress: p } = normalizeImport(parsed);
-        setSections(s);
-        setProgress(p);
-        persist(s, p);
+        const { sections: importedSections, progress: importedProgress } = normalizeImport(parsed);
+        const existingIds = new Set(sectionsRef.current.map(s => s.id));
+        const deduped = importedSections.map(s => existingIds.has(s.id) ? { ...s, id: genId() } : s);
+        const merged = [...sectionsRef.current, ...deduped];
+        const mergedProgress = { ...progressRef.current, ...importedProgress };
+        setSections(merged);
+        setProgress(mergedProgress);
+        persist(merged, mergedProgress);
         onSuccess?.();
       } catch (_) {
         alert('Could not read that file.');
