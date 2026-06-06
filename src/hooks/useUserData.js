@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { sb } from '../lib/supabase';
+import { normalizeImport } from '../utils/importNormalizer';
 
 export function useUserData(userId) {
   const [sections, setSections] = useState([]);
@@ -119,14 +120,12 @@ export function useUserData(userId) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const { sections: s, progress: p } = JSON.parse(reader.result);
-        if (Array.isArray(s)) {
-          setSections(s);
-          setProgress(p || {});
-          persist(s, p || {});
-        } else {
-          alert('Invalid backup file.');
-        }
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed.sections)) { alert('Invalid backup file — expected a "sections" array.'); return; }
+        const { sections: s, progress: p } = normalizeImport(parsed);
+        setSections(s);
+        setProgress(p);
+        persist(s, p);
       } catch (_) {
         alert('Could not read that file.');
       }
