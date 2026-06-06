@@ -1,6 +1,16 @@
 import { genId, slugify } from './id';
 
-const PROXY = 'https://api.allorigins.win/raw?url=';
+const PROXY = 'https://api.allorigins.win/get?url=';
+
+async function proxyFetch(url) {
+  const res = await fetch(`${PROXY}${encodeURIComponent(url)}`);
+  if (!res.ok) throw new Error(`Proxy error ${res.status}`);
+  const json = await res.json();
+  if (json.status?.http_code && json.status.http_code >= 400) {
+    throw new Error(`Remote returned ${json.status.http_code}`);
+  }
+  return json.contents ?? '';
+}
 
 export async function fetchSectionFromUrl(rawUrl) {
   const url = rawUrl.trim();
@@ -19,10 +29,9 @@ export async function fetchSectionFromUrl(rawUrl) {
 
 async function fetchYouTubePlaylist(playlistId) {
   const rssUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
-  const res = await fetch(`${PROXY}${encodeURIComponent(rssUrl)}`);
-  if (!res.ok) throw new Error('Could not reach YouTube. Check the URL and try again.');
-
-  const xml = await res.text();
+  let xml;
+  try { xml = await proxyFetch(rssUrl); }
+  catch { throw new Error('Could not reach YouTube. Check the URL and try again.'); }
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
 
   if (doc.querySelector('parsererror')) throw new Error('YouTube returned an unexpected response. The playlist may be private.');
@@ -49,10 +58,9 @@ async function fetchYouTubePlaylist(playlistId) {
 }
 
 async function fetchWebPage(url) {
-  const res = await fetch(`${PROXY}${encodeURIComponent(url)}`);
-  if (!res.ok) throw new Error('Could not fetch that page. Make sure the URL is public and try again.');
-
-  const html = await res.text();
+  let html;
+  try { html = await proxyFetch(url); }
+  catch { throw new Error('Could not fetch that page. Make sure the URL is public and try again.'); }
   const doc = new DOMParser().parseFromString(html, 'text/html');
 
   ['nav', 'footer', 'aside', 'script', 'style', 'header'].forEach(tag =>
