@@ -156,8 +156,29 @@ export function useUserData(userId) {
 
   const dailyLogs = getDailyLogs(progress);
 
+  const headerMeta = {
+    role: progress.__role || '',
+    kicker: progress.__kicker || '',
+    company: progress.__company || '',
+    summary: progress.__summary || '',
+    pace: progress.__pace || '',
+  };
+
+  const updateHeaderMeta = useCallback((meta) => {
+    setProgress(prev => {
+      const next = { ...prev };
+      if (meta.role !== undefined) next.__role = meta.role;
+      if (meta.kicker !== undefined) next.__kicker = meta.kicker;
+      if (meta.company !== undefined) next.__company = meta.company;
+      if (meta.summary !== undefined) next.__summary = meta.summary;
+      if (meta.pace !== undefined) next.__pace = meta.pace;
+      persist(sectionsRef.current, next);
+      return next;
+    });
+  }, [persist]);
+
   return {
-    sections, progress, username, initialized, saveText, dailyLogs,
-    toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup,
+    sections, progress, username, initialized, saveText, dailyLogs, headerMeta,
+    toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta,
   };
 }

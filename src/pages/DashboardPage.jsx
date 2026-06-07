@@ -17,7 +17,7 @@ import ActivityHeatmap from '../components/ActivityHeatmap';
 import { usePresence } from '../hooks/usePresence';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, initialized, saveText, dailyLogs, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, dailyLogs, headerMeta, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta } = useUserData(userId);
   const liveCount = usePresence(userId);
 
   const [activeFilter, setActiveFilter] = useState('all');
@@ -96,7 +96,7 @@ export default function DashboardPage({ userId, onSignOut }) {
 
   return (
     <div className="wrap">
-      <Header />
+      <Header meta={headerMeta} onSaveMeta={updateHeaderMeta} />
       <LiveUsers count={liveCount} />
       <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} />
       <ActivityHeatmap dailyLogs={dailyLogs} />

@@ -31,9 +31,7 @@ export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, on
         </div>
       </div>
       <p className="note">
-        NeetCode 150 · Grokking Modern System Design Interview · Head First Design Patterns
-        <br />
-        Code every problem with AI off. Apply by August. Mocks from September.
+        Made in Bangalore ❤️ by Hrithik
       </p>
     </>
   );

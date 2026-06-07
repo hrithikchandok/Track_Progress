@@ -108,6 +108,23 @@ h1 {
 h1 .slash { color: var(--faint); font-weight: 400; }
 .sub { color: var(--muted); font-size: 15px; max-width: 600px; }
 .pace { font-family: var(--mono); font-size: 11.5px; color: var(--faint); margin-top: 10px; line-height: 1.7; }
+.editable-hdr { cursor: pointer; position: relative; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background .15s; }
+.editable-hdr:hover { background: rgba(255,255,255,.05); }
+.edit-pencil { font-size: 10px; color: var(--faint); opacity: 0; margin-left: 5px; transition: opacity .15s; }
+.editable-hdr:hover .edit-pencil { opacity: 1; }
+.header-edit-input { background: var(--panel-2); border: 1px solid var(--accent); border-radius: 6px; color: var(--text); padding: 2px 8px; outline: none; }
+.header-edit-kicker { font-family: var(--mono); font-size: 11px; letter-spacing: .32em; text-transform: uppercase; color: var(--accent); font-weight: 700; width: 220px; }
+.header-edit-role { font-family: var(--mono); font-weight: 800; font-size: clamp(22px, 4vw, 36px); color: var(--faint); width: 280px; }
+.header-edit-company { font-size: 14px; color: var(--muted); width: 220px; }
+.company-tag { color: var(--muted); font-size: 14px; }
+.company-tag::before { content: '↳ Targeting '; color: var(--faint); font-size: 12px; }
+.add-company-btn { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--faint); background: transparent; border: 1px dashed var(--line); padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: .15s; }
+.add-company-btn:hover { border-color: var(--accent); color: var(--accent); }
+.header-edit-textarea { width: 100%; background: var(--panel-2); border: 1px solid var(--accent); border-radius: 8px; color: var(--text); font-family: var(--body); font-size: 15px; padding: 8px 12px; outline: none; resize: vertical; line-height: 1.5; margin-top: 8px; }
+.pace-block { margin-top: 10px; font-family: var(--mono); font-size: 11.5px; color: var(--faint); line-height: 1.7; }
+.pace-label { color: var(--faint); }
+.pace-inline { color: var(--faint); }
+.header-edit-pace { font-family: var(--mono); font-size: 11.5px; color: var(--faint); width: 480px; max-width: 100%; }
 
 /* ── Dashboard cards ─────────────────────────── */
 .dash { display: grid; grid-template-columns: 1.1fr 0.9fr 0.9fr; gap: 14px; margin: 24px 0 26px; }
