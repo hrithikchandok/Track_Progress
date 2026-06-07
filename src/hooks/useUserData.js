@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { sb } from '../lib/supabase';
 import { normalizeImport } from '../utils/importNormalizer';
 import { genId } from '../utils/id';
+import { getDailyLogs, todayKey } from '../utils/progress';
 
 export function useUserData(userId) {
   const [sections, setSections] = useState([]);
@@ -14,13 +15,8 @@ export function useUserData(userId) {
   const progressRef = useRef({});
   const saveTimerRef = useRef(null);
 
-  useEffect(() => {
-    sectionsRef.current = sections;
-  }, [sections]);
-
-  useEffect(() => {
-    progressRef.current = progress;
-  }, [progress]);
+  useEffect(() => { sectionsRef.current = sections; }, [sections]);
+  useEffect(() => { progressRef.current = progress; }, [progress]);
 
   useEffect(() => {
     if (!userId) return;
@@ -30,10 +26,8 @@ export function useUserData(userId) {
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
-          const s = data.sections || [];
-          const p = data.progress || {};
-          setSections(s);
-          setProgress(p);
+          setSections(data.sections || []);
+          setProgress(data.progress || {});
           setUsername(data.username || '');
           setInitialized(true);
           setSaveText('All changes saved');
@@ -63,7 +57,25 @@ export function useUserData(userId) {
   const toggle = useCallback((id, val) => {
     setProgress(prev => {
       const next = { ...prev };
-      if (val) next[id] = true; else delete next[id];
+      const prevVal = prev[id];
+
+      if (typeof val === 'number') {
+        if (val <= 0) delete next[id]; else next[id] = val;
+      } else {
+        if (val) next[id] = true; else delete next[id];
+      }
+
+      // Record daily activity for forward progress only
+      const isProgress = typeof val === 'number'
+        ? val > (prevVal || 0)
+        : (val && !prevVal);
+
+      if (isProgress) {
+        const key = todayKey();
+        const logs = next.__d || {};
+        next.__d = { ...logs, [key]: (logs[key] || 0) + 1 };
+      }
+
       persist(sectionsRef.current, next);
       return next;
     });
@@ -142,8 +154,10 @@ export function useUserData(userId) {
     reader.readAsText(file);
   }, [persist]);
 
+  const dailyLogs = getDailyLogs(progress);
+
   return {
-    sections, progress, username, initialized, saveText,
+    sections, progress, username, initialized, saveText, dailyLogs,
     toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup,
   };
 }

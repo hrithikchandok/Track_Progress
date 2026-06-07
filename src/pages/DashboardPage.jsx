@@ -13,10 +13,11 @@ import AddItemModal from '../components/AddItemModal';
 import ShareModal from '../components/ShareModal';
 import LinkImportModal from '../components/LinkImportModal';
 import LiveUsers from '../components/LiveUsers';
+import ActivityHeatmap from '../components/ActivityHeatmap';
 import { usePresence } from '../hooks/usePresence';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, initialized, saveText, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, dailyLogs, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup } = useUserData(userId);
   const liveCount = usePresence(userId);
 
   const [activeFilter, setActiveFilter] = useState('all');
@@ -97,7 +98,8 @@ export default function DashboardPage({ userId, onSignOut }) {
     <div className="wrap">
       <Header />
       <LiveUsers count={liveCount} />
-      <Dashboard sections={sections} progress={progress} />
+      <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} />
+      <ActivityHeatmap dailyLogs={dailyLogs} />
       <TrackBars sections={sections} progress={progress} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
       <SectionList

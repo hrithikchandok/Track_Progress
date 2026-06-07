@@ -17,7 +17,7 @@ export default function Section({ section, progress, isOpen, activeFilter, canEd
       <TaskItem
         key={item.id}
         item={item}
-        done={!!progress[item.id]}
+        value={progress[item.id]}
         track={section.track}
         canEdit={canEdit}
         isEditMode={isEditMode}
