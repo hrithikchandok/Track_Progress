@@ -308,8 +308,22 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
   const [editingIv,   setEditingIv]   = useState(null);
   const [detailIv,    setDetailIv]    = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [isOpen,      setIsOpen]      = useState(true);
 
   const today = todayStr();
+
+  // Count interviews given this calendar month (non-upcoming or past dates)
+  const now = new Date();
+  const thisMonthCount = interviews.filter(iv => {
+    if (!iv.date) return false;
+    const d = new Date(iv.date + 'T00:00:00');
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      (iv.status !== 'upcoming' || iv.date <= today)
+    );
+  }).length;
+  const monthName = now.toLocaleDateString('default', { month: 'long' });
 
   const upcoming = interviews
     .filter(iv => iv.status === 'upcoming' && iv.date >= today)
@@ -356,13 +370,20 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
     : upcoming;
 
   return (
-    <div className="iv-section">
+    <div className={`iv-section${isOpen ? ' iv-open' : ''}`}>
       {/* ── Header ── */}
-      <div className="iv-section-head">
-        <div>
-          <div className="kicker" style={{ marginBottom: 6 }}>Interviews</div>
+      <div
+        className="iv-section-head"
+        onClick={() => setIsOpen(v => !v)}
+        style={{ cursor: 'pointer' }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <div className="kicker">Interviews</div>
+            <span className="iv-month-badge">{thisMonthCount} this {monthName}</span>
+          </div>
           {applicationsCount > 0 && (
-            <div className="iv-conversion">
+            <div className="iv-conversion" onClick={e => e.stopPropagation()}>
               <span className="iv-conv-num">{interviews.length}</span>
               <span className="iv-conv-sep"> interviews from </span>
               <button
@@ -377,23 +398,26 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
           )}
         </div>
 
-        <div className="iv-stats-row">
-          {[
-            { num: interviews.length, lbl: 'Total',    col: 'var(--text)' },
-            { num: upcoming.length,   lbl: 'Upcoming', col: 'var(--accent)' },
-            { num: selectedCount,     lbl: 'Selected', col: 'var(--proc)' },
-            { num: rejectedCount,     lbl: 'Rejected', col: 'var(--core)' },
-          ].map(({ num, lbl, col }) => (
-            <div key={lbl} className="iv-stat">
-              <span className="iv-stat-num" style={{ color: col }}>{num}</span>
-              <span className="iv-stat-lbl">{lbl}</span>
-            </div>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div className="iv-stats-row" onClick={e => e.stopPropagation()}>
+            {[
+              { num: interviews.length, lbl: 'Total',    col: 'var(--text)' },
+              { num: upcoming.length,   lbl: 'Upcoming', col: 'var(--accent)' },
+              { num: selectedCount,     lbl: 'Selected', col: 'var(--proc)' },
+              { num: rejectedCount,     lbl: 'Rejected', col: 'var(--core)' },
+            ].map(({ num, lbl, col }) => (
+              <div key={lbl} className="iv-stat">
+                <span className="iv-stat-num" style={{ color: col }}>{num}</span>
+                <span className="iv-stat-lbl">{lbl}</span>
+              </div>
+            ))}
+          </div>
+          <span className="iv-chev">{isOpen ? '▾' : '▸'}</span>
         </div>
       </div>
 
       {/* ── Body ── */}
-      <div className="iv-layout">
+      {isOpen && <div className="iv-layout">
         {/* Left: calendar + upcoming */}
         <div className="iv-left">
           <MiniCalendar
@@ -441,7 +465,7 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
             ))
           )}
         </div>
-      </div>
+      </div>}
 
       {/* ── Modals ── */}
       {showModal && (

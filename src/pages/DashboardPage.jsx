@@ -101,7 +101,7 @@ export default function DashboardPage({ userId, onSignOut }) {
       <LiveUsers count={liveCount} />
       <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} />
       <ActivityHeatmap dailyLogs={dailyLogs} />
-      <TrackBars sections={sections} progress={progress} />
+      <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
       <InterviewsSection
         interviews={interviews}

@@ -150,7 +150,7 @@ h1 .slash { color: var(--faint); font-weight: 400; }
 .streak-label { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: .06em; margin-top: auto; padding-top: 14px; line-height: 1.6; }
 
 /* ── Track bars ──────────────────────────────── */
-.tracks { display: grid; gap: 14px 24px; margin-bottom: 30px; }
+.tracks { display: grid; gap: 14px 24px; margin-bottom: 30px; flex-wrap: wrap; }
 @media (max-width: 680px) { .tracks { grid-template-columns: 1fr !important; } }
 .trk-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
 .trk-name { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
@@ -158,6 +158,8 @@ h1 .slash { color: var(--faint); font-weight: 400; }
 .trk-pct { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .trk-bar { height: 6px; background: var(--panel-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--line-soft); }
 .trk-bar i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width .5s cubic-bezier(.4, 0, .2, 1); }
+.trk-active .trk-bar { height: 8px; border-color: var(--line); }
+.trk-active .trk-pct { font-size: 13px; color: var(--text); }
 
 /* ── Filter chips ────────────────────────────── */
 .filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; align-items: center; }
@@ -179,8 +181,8 @@ h1 .slash { color: var(--faint); font-weight: 400; }
 .section.open .sec-chev { transform: rotate(90deg); }
 .sec-body { display: none; padding: 2px 18px 14px; border-top: 1px solid var(--line-soft); }
 .section.open .sec-body { display: block; }
-.miniprog { height: 4px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin: 0 18px 14px; border: 1px solid var(--line-soft); }
-.section:not(.open) .miniprog { display: none; }
+.miniprog { height: 4px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin: 0 18px 8px; border: 1px solid var(--line-soft); }
+.section.open .miniprog { margin-bottom: 14px; }
 .miniprog i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width .45s cubic-bezier(.4, 0, .2, 1); }
 
 /* ── Edit mode controls ──────────────────────── */
@@ -289,9 +291,13 @@ h1 .slash { color: var(--faint); font-weight: 400; }
 .live-count { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 18px; }
 
 /* ── Interviews Section ───────────────────────── */
-.iv-section { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px 20px; margin-bottom: 28px; }
+.iv-section { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 24px 16px; margin-bottom: 28px; }
+.iv-section.iv-open { padding-bottom: 20px; }
 
-.iv-section-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+.iv-section-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 0; transition: margin .2s; }
+.iv-section.iv-open .iv-section-head { margin-bottom: 20px; }
+.iv-chev { font-family: var(--mono); font-size: 14px; color: var(--faint); flex-shrink: 0; line-height: 1; }
+.iv-month-badge { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: rgba(245,181,68,.12); border: 1px solid rgba(245,181,68,.3); border-radius: 99px; padding: 2px 9px; white-space: nowrap; }
 .iv-conversion { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-top: 4px; }
 .iv-conv-num { font-weight: 800; font-size: 20px; color: var(--text); }
 .iv-conv-sep { color: var(--faint); }
