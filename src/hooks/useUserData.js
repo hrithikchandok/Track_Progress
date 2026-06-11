@@ -156,6 +156,25 @@ export function useUserData(userId) {
 
   const dailyLogs = getDailyLogs(progress);
 
+  const interviews       = progress.__iv       || [];
+  const applicationsCount = progress.__appCount || 0;
+
+  const saveInterviews = useCallback((newInterviews) => {
+    setProgress(prev => {
+      const next = { ...prev, __iv: newInterviews };
+      persist(sectionsRef.current, next);
+      return next;
+    });
+  }, [persist]);
+
+  const saveApplicationsCount = useCallback((count) => {
+    setProgress(prev => {
+      const next = { ...prev, __appCount: count };
+      persist(sectionsRef.current, next);
+      return next;
+    });
+  }, [persist]);
+
   const headerMeta = {
     role: progress.__role || '',
     kicker: progress.__kicker || '',
@@ -179,6 +198,8 @@ export function useUserData(userId) {
 
   return {
     sections, progress, username, initialized, saveText, dailyLogs, headerMeta,
+    interviews, applicationsCount,
     toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta,
+    saveInterviews, saveApplicationsCount,
   };
 }

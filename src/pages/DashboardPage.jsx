@@ -14,10 +14,11 @@ import ShareModal from '../components/ShareModal';
 import LinkImportModal from '../components/LinkImportModal';
 import LiveUsers from '../components/LiveUsers';
 import ActivityHeatmap from '../components/ActivityHeatmap';
+import InterviewsSection from '../components/InterviewsSection';
 import { usePresence } from '../hooks/usePresence';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, initialized, saveText, dailyLogs, headerMeta, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, dailyLogs, headerMeta, interviews, applicationsCount, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount } = useUserData(userId);
   const liveCount = usePresence(userId);
 
   const [activeFilter, setActiveFilter] = useState('all');
@@ -102,6 +103,12 @@ export default function DashboardPage({ userId, onSignOut }) {
       <ActivityHeatmap dailyLogs={dailyLogs} />
       <TrackBars sections={sections} progress={progress} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
+      <InterviewsSection
+        interviews={interviews}
+        applicationsCount={applicationsCount}
+        onSave={saveInterviews}
+        onUpdateApps={saveApplicationsCount}
+      />
       <SectionList
         sections={sections}
         progress={progress}

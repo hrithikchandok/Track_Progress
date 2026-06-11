@@ -287,3 +287,72 @@ h1 .slash { color: var(--faint); font-weight: 400; }
 /* ── Live Users ───────────────────────────────── */
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; flex-shrink: 0; box-shadow: 0 0 6px #4ade8088; }
 .live-count { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 18px; }
+
+/* ── Interviews Section ───────────────────────── */
+.iv-section { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px 20px; margin-bottom: 28px; }
+
+.iv-section-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+.iv-conversion { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-top: 4px; }
+.iv-conv-num { font-weight: 800; font-size: 20px; color: var(--text); }
+.iv-conv-sep { color: var(--faint); }
+.iv-conv-apps { background: transparent; border: none; cursor: pointer; font-family: var(--mono); font-size: 13px; color: var(--accent); text-decoration: underline dotted; padding: 0; }
+.iv-conv-rate { color: var(--faint); }
+.iv-conv-set { background: transparent; border: 1px dashed var(--line); border-radius: 6px; padding: 4px 10px; font-family: var(--mono); font-size: 11px; color: var(--faint); cursor: pointer; transition: .15s; }
+.iv-conv-set:hover { border-color: var(--accent); color: var(--accent); }
+
+.iv-stats-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.iv-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 48px; }
+.iv-stat-num { font-family: var(--mono); font-weight: 800; font-size: 22px; line-height: 1; }
+.iv-stat-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+
+/* Two-column body */
+.iv-layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
+@media (max-width: 700px) { .iv-layout { grid-template-columns: 1fr; } }
+.iv-left { min-width: 0; }
+.iv-sidebar { border-left: 1px solid var(--line-soft); padding-left: 20px; max-height: 520px; overflow-y: auto; }
+@media (max-width: 700px) { .iv-sidebar { border-left: none; border-top: 1px solid var(--line-soft); padding-left: 0; padding-top: 16px; max-height: none; } }
+
+/* Mini calendar */
+.iv-calendar { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.iv-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.iv-cal-nav { background: transparent; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 16px; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; transition: .15s; line-height: 1; }
+.iv-cal-nav:hover { border-color: var(--faint); color: var(--text); }
+.iv-cal-month { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); letter-spacing: .04em; }
+.iv-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.iv-cal-dow { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); text-align: center; padding: 4px 0 6px; }
+.iv-cal-day { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--muted); font-family: var(--mono); font-size: 12px; cursor: pointer; transition: .15s; padding: 0; gap: 1px; }
+.iv-cal-day:hover { background: var(--line); color: var(--text); }
+.iv-cal-day.today { color: var(--accent); border-color: var(--accent); font-weight: 800; }
+.iv-cal-day.selected { background: rgba(245,181,68,.15); border-color: var(--accent); color: var(--accent); }
+.iv-cal-day.has-iv { color: var(--text); }
+.iv-cal-dot { width: 4px; height: 4px; border-radius: 50%; display: block; }
+
+/* Upcoming cards */
+.iv-upcoming-card { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 10px; cursor: pointer; transition: .15s; margin-bottom: 8px; }
+.iv-upcoming-card:hover { border-color: var(--line); background: var(--panel-2); }
+.iv-card-role { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iv-card-company { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iv-card-round { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-top: 2px; }
+
+/* Past cards (sidebar) */
+.iv-past-card { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line-soft); cursor: pointer; transition: background .15s; }
+.iv-past-card:last-child { border-bottom: none; }
+.iv-past-card:hover { opacity: .8; }
+.iv-past-company { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iv-past-role { font-family: var(--mono); font-size: 10px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+/* Shared */
+.iv-logo-fallback { border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--muted); font-family: var(--mono); flex-shrink: 0; }
+.iv-verdict-badge { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border: 1px solid; border-radius: 99px; padding: 2px 8px; white-space: nowrap; }
+.iv-verdict-chip { flex: 1; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; padding: 6px 4px; border-radius: 8px; border: 1px solid; transition: .15s; }
+.iv-verdict-chip:hover { opacity: .85; }
+.iv-list-label { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.iv-clear-sel { background: transparent; border: none; font-family: var(--mono); font-size: 10px; color: var(--faint); cursor: pointer; padding: 0; }
+.iv-clear-sel:hover { color: var(--text); }
+.iv-add-btn { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--faint); background: transparent; border: 1px dashed var(--line); padding: 8px 14px; border-radius: 9px; cursor: pointer; transition: .15s; width: 100%; margin-top: 10px; }
+.iv-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+.iv-list-items { margin-bottom: 4px; }
+.iv-list-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line-soft); }
+.iv-list-item:last-child { border-bottom: none; }
+.iv-rm-btn { background: none; border: none; color: var(--faint); cursor: pointer; font-size: 15px; padding: 0 2px; line-height: 1; flex-shrink: 0; transition: color .15s; }
+.iv-rm-btn:hover { color: var(--core); }
