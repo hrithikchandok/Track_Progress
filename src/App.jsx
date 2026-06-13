@@ -4,6 +4,9 @@ import { useAuth } from './hooks/useAuth';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import PublicPage from './pages/PublicPage';
+import ArticlesPage from './pages/ArticlesPage';
+import PublicArticlesPage from './pages/PublicArticlesPage';
+import ArticleReadPage from './pages/ArticleReadPage';
 import BackgroundCanvas from './components/BackgroundCanvas';
 import BgPicker from './components/BgPicker';
 
@@ -28,8 +31,15 @@ export default function App() {
       {session && <BgPicker mode={bgMode} onChange={handleBgChange} />}
       <Routes>
         <Route path="/u/:username" element={<PublicPage />} />
+        <Route path="/u/:username/articles" element={<PublicArticlesPage />} />
+        <Route path="/u/:username/article/:id" element={<ArticleReadPage />} />
         <Route path="/login" element={
           session ? <Navigate to="/" replace /> : <AuthPage onSignIn={signIn} onSignUp={signUp} />
+        } />
+        <Route path="/articles" element={
+          loading ? <div className="wrap" style={{ paddingTop: 80 }}><p className="sub">Loading…</p></div>
+            : session ? <ArticlesPage userId={session.user.id} onSignOut={signOut} />
+            : <Navigate to="/login" replace />
         } />
         <Route path="/*" element={
           <AuthGate session={session} loading={loading} signIn={signIn} signUp={signUp} signOut={signOut} />

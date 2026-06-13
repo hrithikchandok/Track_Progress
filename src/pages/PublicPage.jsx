@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { sb } from '../lib/supabase';
 import Header from '../components/Header';
+import TopNav from '../components/TopNav';
 import Dashboard from '../components/Dashboard';
 import TrackBars from '../components/TrackBars';
 import FilterBar from '../components/FilterBar';
@@ -49,6 +50,13 @@ export default function PublicPage() {
 
   return (
     <div className="wrap view-only">
+      <TopNav
+        active="tracker"
+        links={[
+          { key: 'tracker', label: '◷ Tracker', to: `/u/${username}` },
+          { key: 'articles', label: '✎ Articles', to: `/u/${username}/articles` },
+        ]}
+      />
       <div className="banner view" style={{ marginBottom: 22 }}>
         🔵 <b>Live view</b> — {username}&rsquo;s progress (read-only).
       </div>

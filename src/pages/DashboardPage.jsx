@@ -6,6 +6,7 @@ import { playF1Rev } from '../utils/sfx';
 import { randomQuote } from '../data/quotes';
 import { genId } from '../utils/id';
 import Header from '../components/Header';
+import TopNav from '../components/TopNav';
 import TodayPanel from '../components/TodayPanel';
 import Dashboard from '../components/Dashboard';
 import TrackBars from '../components/TrackBars';
@@ -158,6 +159,10 @@ export default function DashboardPage({ userId, onSignOut }) {
   return (
     <div className={`wrap${dread > 0.02 ? ' degrade' : ''}`} style={{ '--dread': dread }}>
       {dread > 0.02 && <div className="dread-overlay" style={{ opacity: dread }} />}
+      <TopNav
+        active="tracker"
+        links={[{ key: 'tracker', label: '◷ Tracker', to: '/' }, { key: 'articles', label: '✎ Articles', to: '/articles' }]}
+      />
       <Header
         meta={headerMeta}
         onSaveMeta={updateHeaderMeta}
