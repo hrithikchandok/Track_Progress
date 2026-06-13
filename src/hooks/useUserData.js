@@ -175,6 +175,23 @@ export function useUserData(userId) {
     });
   }, [persist]);
 
+  // ── Today list ────────────────────────────────
+  // Stored as { date: 'YYYY-MM-DD', ids: [...] }. Resets automatically each day.
+  const todayRaw = progress.__today || {};
+  const todayIds = todayRaw.date === todayKey() ? (todayRaw.ids || []) : [];
+
+  const toggleTodayItem = useCallback((id) => {
+    setProgress(prev => {
+      const raw = prev.__today || {};
+      const today = todayKey();
+      const ids = raw.date === today ? (raw.ids || []) : [];
+      const nextIds = ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
+      const next = { ...prev, __today: { date: today, ids: nextIds } };
+      persist(sectionsRef.current, next);
+      return next;
+    });
+  }, [persist]);
+
   const headerMeta = {
     role: progress.__role || '',
     kicker: progress.__kicker || '',
@@ -198,8 +215,8 @@ export function useUserData(userId) {
 
   return {
     sections, progress, username, initialized, saveText, dailyLogs, headerMeta,
-    interviews, applicationsCount,
+    interviews, applicationsCount, todayIds,
     toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta,
-    saveInterviews, saveApplicationsCount,
+    saveInterviews, saveApplicationsCount, toggleTodayItem,
   };
 }

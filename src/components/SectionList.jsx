@@ -1,6 +1,6 @@
 import Section from './Section';
 
-export default function SectionList({ sections, progress, openSections, activeFilter, canEdit, isEditMode, onToggle, onSectionToggle, onDeleteSection, onAddItem, onDeleteItem }) {
+export default function SectionList({ sections, progress, openSections, activeFilter, canEdit, isEditMode, todayIds, onToggle, onToggleToday, onSectionToggle, onDeleteSection, onAddItem, onDeleteItem }) {
   return (
     <div id="plan">
       {(sections || []).map(section => (
@@ -12,7 +12,9 @@ export default function SectionList({ sections, progress, openSections, activeFi
           activeFilter={activeFilter}
           canEdit={canEdit}
           isEditMode={isEditMode}
+          todayIds={todayIds}
           onToggle={onToggle}
+          onToggleToday={onToggleToday}
           onSectionToggle={onSectionToggle}
           onDeleteSection={onDeleteSection}
           onAddItem={onAddItem}

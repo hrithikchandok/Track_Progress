@@ -1,7 +1,7 @@
 import { secProgress } from '../utils/progress';
 import TaskItem from './TaskItem';
 
-export default function Section({ section, progress, isOpen, activeFilter, canEdit, isEditMode, onToggle, onSectionToggle, onDeleteSection, onAddItem, onDeleteItem }) {
+export default function Section({ section, progress, isOpen, activeFilter, canEdit, isEditMode, todayIds, onToggle, onToggleToday, onSectionToggle, onDeleteSection, onAddItem, onDeleteItem }) {
   const { pct, label } = secProgress(section, progress);
   const isVisible = activeFilter === 'all' || section.track === activeFilter;
   if (!isVisible) return null;
@@ -21,7 +21,9 @@ export default function Section({ section, progress, isOpen, activeFilter, canEd
         track={section.track}
         canEdit={canEdit}
         isEditMode={isEditMode}
+        isToday={todayIds?.includes(item.id)}
         onToggle={onToggle}
+        onToggleToday={onToggleToday}
         onDelete={isEditMode ? () => onDeleteItem(section.id, item.id) : undefined}
       />
     );

@@ -1,12 +1,21 @@
-export default function TaskItem({ item, value, canEdit, isEditMode, onToggle, onDelete }) {
+export default function TaskItem({ item, value, canEdit, isEditMode, isToday, onToggle, onToggleToday, onDelete }) {
   const type = item.type || 'boolean';
+
+  // Star button — pins a task to the Today list. Hidden in edit mode and for link rows.
+  const starBtn = canEdit && !isEditMode && type !== 'link' && onToggleToday ? (
+    <button
+      className={`star-btn${isToday ? ' on' : ''}`}
+      onClick={() => onToggleToday(item.id)}
+      title={isToday ? 'Remove from Today' : 'Add to Today'}
+    >{isToday ? '★' : '☆'}</button>
+  ) : null;
 
   if (type === 'counter') {
     const current = typeof value === 'number' ? value : 0;
     const target = item.target || 1;
     const isDone = current >= target;
     return (
-      <div className={`task${isDone ? ' done' : ''}`}>
+      <div className={`task${isDone ? ' done' : ''}${isToday ? ' is-today' : ''}`}>
         <span className="task-text">{item.text}</span>
         {item.meta && <span className="task-meta">{item.meta}</span>}
         <div className="counter-ctrl">
@@ -22,6 +31,7 @@ export default function TaskItem({ item, value, canEdit, isEditMode, onToggle, o
             disabled={!canEdit || current >= target}
           >+</button>
         </div>
+        {starBtn}
         {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
       </div>
     );
@@ -45,7 +55,7 @@ export default function TaskItem({ item, value, canEdit, isEditMode, onToggle, o
   // boolean (default)
   const done = !!value;
   return (
-    <div className={`task${done ? ' done' : ''}`}>
+    <div className={`task${done ? ' done' : ''}${isToday ? ' is-today' : ''}`}>
       <input
         type="checkbox"
         className="cb"
@@ -57,6 +67,7 @@ export default function TaskItem({ item, value, canEdit, isEditMode, onToggle, o
         {item.text}
       </span>
       {item.meta && <span className="task-meta">{item.meta}</span>}
+      {starBtn}
       {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
     </div>
   );
