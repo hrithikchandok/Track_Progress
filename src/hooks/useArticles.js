@@ -21,7 +21,7 @@ export function useArticles(userId) {
 
   const createArticle = useCallback(async () => {
     const { data, error } = await sb.from('articles')
-      .insert({ user_id: userId, title: 'Untitled', blocks: [] })
+      .insert({ user_id: userId, title: 'Untitled', blocks: null })
       .select('id')
       .single();
     if (!error) await refresh();
