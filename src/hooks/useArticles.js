@@ -20,12 +20,14 @@ export function useArticles(userId) {
   useEffect(() => { refresh(); }, [refresh]);
 
   const createArticle = useCallback(async () => {
+    // `blocks` is NOT NULL — start with an empty TipTap doc.
     const { data, error } = await sb.from('articles')
-      .insert({ user_id: userId, title: 'Untitled', blocks: null })
+      .insert({ user_id: userId, title: 'Untitled', blocks: { type: 'doc', content: [] } })
       .select('id')
       .single();
-    if (!error) await refresh();
-    return data?.id;
+    if (error) { console.error('createArticle failed:', error); return { id: null, error }; }
+    await refresh();
+    return { id: data.id, error: null };
   }, [userId, refresh]);
 
   const getArticle = useCallback(async (id) => {

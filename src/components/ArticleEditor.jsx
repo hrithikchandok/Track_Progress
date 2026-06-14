@@ -16,7 +16,9 @@ export default function ArticleEditor({ initial, username, onBack, onSave, onPub
   const [preview, setPreview] = useState(false);
   const [status, setStatus] = useState('');
 
-  const fields = () => ({ title: title.trim() || 'Untitled', subtitle: subtitle.trim() || null, blocks: doc || null });
+  // `blocks` is NOT NULL in the DB — fall back to an empty doc, never null.
+  const EMPTY_DOC = { type: 'doc', content: [] };
+  const fields = () => ({ title: title.trim() || 'Untitled', subtitle: subtitle.trim() || null, blocks: doc || EMPTY_DOC });
 
   async function doSave() {
     setStatus('Saving…');

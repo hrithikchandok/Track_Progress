@@ -48,7 +48,12 @@ const CodeBlock = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlockView);
   },
-}).configure({ lowlight });
+}).configure({
+  lowlight,
+  // Keyboard escape hatches so the cursor is never stuck in a code block:
+  exitOnArrowDown: true,   // ArrowDown at the end drops into a paragraph below
+  exitOnTripleEnter: true, // three Enters breaks out
+});
 
 function makeExtensions(editable) {
   return [
@@ -121,6 +126,20 @@ export default function RichEditor({ content, editable = true, onChange }) {
     if (url) editor.chain().focus().setImage({ src: url }).run();
   };
 
+  // Clicking the empty space below the content moves the cursor OUT of whatever
+  // it was in (e.g. a trailing code block) and into a normal paragraph at the
+  // end — creating one if the last node isn't already an empty paragraph.
+  const escapeToParagraphBelow = () => {
+    const { state } = editor;
+    const last = state.doc.lastChild;
+    const isEmptyPara = last && last.type.name === 'paragraph' && last.content.size === 0;
+    if (isEmptyPara) {
+      editor.chain().focus('end').run();
+    } else {
+      editor.chain().insertContentAt(state.doc.content.size, { type: 'paragraph' }).focus('end').run();
+    }
+  };
+
   return (
     <div className="rich-editor">
       {/* Floating toolbar on text selection */}
@@ -146,6 +165,7 @@ export default function RichEditor({ content, editable = true, onChange }) {
       </FloatingMenu>
 
       <EditorContent editor={editor} />
+      <div className="re-clickzone" onClick={escapeToParagraphBelow} aria-hidden="true" />
     </div>
   );
 }

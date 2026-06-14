@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { sb } from '../lib/supabase';
 import { useArticles } from '../hooks/useArticles';
 import TopNav from '../components/TopNav';
-import ArticleEditor from '../components/ArticleEditor';
 
 function fmtDate(iso) {
   if (!iso) return '';
@@ -10,9 +10,10 @@ function fmtDate(iso) {
 }
 
 export default function ArticlesPage({ userId, onSignOut }) {
-  const { articles, loading, createArticle, getArticle, saveArticle, setPublished, deleteArticle } = useArticles(userId);
-  const [editing, setEditing] = useState(null);
+  const { articles, loading, createArticle } = useArticles(userId);
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
   const [username, setUsername] = useState('');
 
   useEffect(() => {
@@ -22,33 +23,16 @@ export default function ArticlesPage({ userId, onSignOut }) {
 
   async function openNew() {
     setBusy(true);
-    const id = await createArticle();
-    if (id) setEditing(await getArticle(id));
+    setErr('');
+    const { id, error } = await createArticle();
     setBusy(false);
-  }
-
-  async function open(id) {
-    setBusy(true);
-    setEditing(await getArticle(id));
-    setBusy(false);
-  }
-
-  if (editing) {
-    return (
-      <ArticleEditor
-        key={editing.id}
-        initial={editing}
-        username={username}
-        onBack={() => setEditing(null)}
-        onSave={fields => saveArticle(editing.id, fields)}
-        onPublishToggle={pub => setPublished(editing.id, pub)}
-        onDelete={async () => {
-          if (!confirm('Delete this article permanently?')) return;
-          await deleteArticle(editing.id);
-          setEditing(null);
-        }}
-      />
-    );
+    if (error || !id) {
+      setErr(error?.message
+        ? `Couldn't create article: ${error.message}`
+        : "Couldn't create the article. Make sure the `articles` table exists in Supabase (run supabase_articles.sql).");
+      return;
+    }
+    navigate(`/articles/${id}`);
   }
 
   const navRight = (
@@ -73,21 +57,23 @@ export default function ArticlesPage({ userId, onSignOut }) {
           <p className="sub" style={{ marginTop: 6 }}>Draft, publish, and share long-form notes. Published pieces appear on your public profile.</p>
         </div>
         <button className="btn btn-primary new-article-btn" onClick={openNew} disabled={busy}>
-          {busy ? '…' : '+ New article'}
+          {busy ? 'Creating…' : '+ New article'}
         </button>
       </div>
+
+      {err && <div className="banner edit" style={{ borderColor: 'rgba(248,113,113,.4)', color: 'var(--core)', background: 'rgba(248,113,113,.08)' }}>{err}</div>}
 
       {loading ? (
         <p className="sub">Loading…</p>
       ) : articles.length === 0 ? (
         <div className="articles-empty">
           <p>No articles yet.</p>
-          <button className="btn btn-primary" onClick={openNew} disabled={busy}>Write your first one</button>
+          <button className="btn btn-primary" onClick={openNew} disabled={busy}>{busy ? 'Creating…' : 'Write your first one'}</button>
         </div>
       ) : (
         <div className="articles-list">
           {articles.map(a => (
-            <button key={a.id} className="article-row" onClick={() => open(a.id)}>
+            <button key={a.id} className="article-row" onClick={() => navigate(`/articles/${a.id}`)}>
               <div className="article-row-main">
                 <span className="article-row-title">{a.title || 'Untitled'}</span>
                 {a.subtitle && <span className="article-row-sub">{a.subtitle}</span>}

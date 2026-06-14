@@ -9,6 +9,7 @@ import BgPicker from './components/BgPicker';
 
 // Article pages pull in TipTap + highlight.js — load them only on demand.
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
+const ArticleEditorPage = lazy(() => import('./pages/ArticleEditorPage'));
 const PublicArticlesPage = lazy(() => import('./pages/PublicArticlesPage'));
 const ArticleReadPage = lazy(() => import('./pages/ArticleReadPage'));
 
@@ -44,6 +45,11 @@ export default function App() {
           <Route path="/articles" element={
             loading ? <PageFallback />
               : session ? <ArticlesPage userId={session.user.id} onSignOut={signOut} />
+              : <Navigate to="/login" replace />
+          } />
+          <Route path="/articles/:id" element={
+            loading ? <PageFallback />
+              : session ? <ArticleEditorPage userId={session.user.id} />
               : <Navigate to="/login" replace />
           } />
           <Route path="/*" element={
