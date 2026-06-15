@@ -1,38 +1,72 @@
-export default function TaskItem({ item, value, canEdit, isEditMode, isToday, onToggle, onToggleToday, onDelete }) {
-  const type = item.type || 'boolean';
+import { useState } from 'react';
 
-  // Star button — pins a task to the Today list. Hidden in edit mode and for link rows.
-  const starBtn = canEdit && !isEditMode && type !== 'link' && onToggleToday ? (
-    <button
-      className={`star-btn${isToday ? ' on' : ''}`}
-      onClick={() => onToggleToday(item.id)}
-      title={isToday ? 'Remove from Today' : 'Add to Today'}
-    >{isToday ? '★' : '☆'}</button>
-  ) : null;
+export default function TaskItem({ item, value, canEdit, isEditMode, isToday, note = '', onToggle, onToggleToday, onSaveNote, onDelete }) {
+  const type = item.type || 'boolean';
+  const current = typeof value === 'number' ? value : 0;
+  const target = item.target || 1;
+  const done = type === 'counter' ? current >= target : type === 'boolean' ? !!value : false;
+
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [draft, setDraft] = useState(note);
+
+  function toggleNote() {
+    setNoteOpen(o => {
+      if (!o) setDraft(note); // refresh draft from latest saved note when opening
+      return !o;
+    });
+  }
+  function saveNote() { onSaveNote?.(item.id, draft); setNoteOpen(false); }
+
+  // Star + revision badge + note icon — shared by boolean & counter rows.
+  const extras = (type === 'link') ? null : (
+    <>
+      {canEdit && onToggleToday && (
+        <button
+          className={`star-btn${isToday ? ' on' : ''}`}
+          onClick={() => onToggleToday(item.id)}
+          title={isToday ? 'Remove from Today' : 'Add to Today'}
+        >{isToday ? '★' : '☆'}</button>
+      )}
+      {canEdit && onSaveNote && (
+        <button
+          className={`note-btn${note ? ' has-note' : ''}${noteOpen ? ' open' : ''}`}
+          onClick={toggleNote}
+          title={note ? 'Edit note' : 'Add note'}
+        >✎</button>
+      )}
+    </>
+  );
+
+  const notePanel = noteOpen && canEdit && (
+    <div className="task-note" onClick={e => e.stopPropagation()}>
+      <textarea
+        className="task-note-input"
+        autoFocus
+        value={draft}
+        placeholder="Notes for this topic — gotchas, patterns, links…"
+        onChange={e => setDraft(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Escape') setNoteOpen(false); }}
+      />
+      <div className="task-note-actions">
+        <button className="tn-btn save" onClick={saveNote}>Save</button>
+        <button className="tn-btn" onClick={() => setNoteOpen(false)}>Cancel</button>
+      </div>
+    </div>
+  );
 
   if (type === 'counter') {
-    const current = typeof value === 'number' ? value : 0;
-    const target = item.target || 1;
-    const isDone = current >= target;
     return (
-      <div className={`task${isDone ? ' done' : ''}${isToday ? ' is-today' : ''}`}>
+      <div className={`task${done ? ' done' : ''}${isToday ? ' is-today' : ''}`}>
         <span className="task-text">{item.text}</span>
         {item.meta && <span className="task-meta">{item.meta}</span>}
         <div className="counter-ctrl">
-          <button
-            className="cnt-btn"
-            onClick={() => canEdit && onToggle(item.id, Math.max(0, current - 1))}
-            disabled={!canEdit || current === 0}
-          >−</button>
+          <button className="cnt-btn" onClick={() => canEdit && onToggle(item.id, Math.max(0, current - 1))} disabled={!canEdit || current === 0}>−</button>
           <span className="cnt-val">{current}<span className="cnt-tot">/{target}</span></span>
-          <button
-            className="cnt-btn"
-            onClick={() => canEdit && onToggle(item.id, Math.min(target, current + 1))}
-            disabled={!canEdit || current >= target}
-          >+</button>
+          <button className="cnt-btn" onClick={() => canEdit && onToggle(item.id, Math.min(target, current + 1))} disabled={!canEdit || current >= target}>+</button>
         </div>
-        {starBtn}
+        {extras}
         {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
+        {notePanel}
       </div>
     );
   }
@@ -53,7 +87,6 @@ export default function TaskItem({ item, value, canEdit, isEditMode, isToday, on
   }
 
   // boolean (default)
-  const done = !!value;
   return (
     <div className={`task${done ? ' done' : ''}${isToday ? ' is-today' : ''}`}>
       <input
@@ -67,8 +100,9 @@ export default function TaskItem({ item, value, canEdit, isEditMode, isToday, on
         {item.text}
       </span>
       {item.meta && <span className="task-meta">{item.meta}</span>}
-      {starBtn}
+      {extras}
       {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
+      {notePanel}
     </div>
   );
 }

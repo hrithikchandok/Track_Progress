@@ -24,7 +24,7 @@ import InterviewsSection from '../components/InterviewsSection';
 import { usePresence } from '../hooks/usePresence';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, initialized, saveText, dailyLogs, headerMeta, interviews, applicationsCount, todayIds, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount, toggleTodayItem } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, dailyLogs, headerMeta, interviews, applicationsCount, todayIds, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote } = useUserData(userId);
   const liveCount = usePresence(userId);
   const clock = useDayClock();
 
@@ -199,6 +199,8 @@ export default function DashboardPage({ userId, onSignOut }) {
         todayIds={todayIds}
         onToggle={handleToggle}
         onToggleToday={toggleTodayItem}
+        onReviseSection={reviseSection}
+        onSaveNote={saveNote}
         onSectionToggle={handleSectionToggle}
         onDeleteSection={handleDeleteSection}
         onAddItem={id => setAddItemTo(id)}

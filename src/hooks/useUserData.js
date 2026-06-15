@@ -192,6 +192,33 @@ export function useUserData(userId) {
     });
   }, [persist]);
 
+  // ── Section revision passes (progress.__secrev[sectionId] = 0..3) ──
+  // Advancing a stage logs the revision (R1/R2/R3) and unchecks the whole
+  // section so it can be completed again for the next pass.
+  const reviseSection = useCallback((sectionId) => {
+    setProgress(prev => {
+      const section = sectionsRef.current.find(s => s.id === sectionId);
+      if (!section) return prev;
+      const stages = prev.__secrev || {};
+      const nextStage = Math.min(3, (stages[sectionId] || 0) + 1);
+      const next = { ...prev, __secrev: { ...stages, [sectionId]: nextStage } };
+      (section.items || []).forEach(i => { delete next[i.id]; }); // uncheck the list
+      persist(sectionsRef.current, next);
+      return next;
+    });
+  }, [persist]);
+
+  const saveNote = useCallback((id, text) => {
+    setProgress(prev => {
+      const notes = { ...(prev.__note || {}) };
+      const t = (text || '').trim();
+      if (t) notes[id] = t; else delete notes[id];
+      const next = { ...prev, __note: notes };
+      persist(sectionsRef.current, next);
+      return next;
+    });
+  }, [persist]);
+
   const headerMeta = {
     role: progress.__role || '',
     kicker: progress.__kicker || '',
@@ -217,6 +244,6 @@ export function useUserData(userId) {
     sections, progress, username, initialized, saveText, dailyLogs, headerMeta,
     interviews, applicationsCount, todayIds,
     toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta,
-    saveInterviews, saveApplicationsCount, toggleTodayItem,
+    saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote,
   };
 }
