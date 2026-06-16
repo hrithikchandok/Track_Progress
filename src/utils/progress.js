@@ -40,15 +40,30 @@ export function overallStats(sections, progress) {
   return { total, done, pct: total > 0 ? Math.round(done / total * 100) : 0 };
 }
 
-export function countdown(targetDate = '2026-12-31') {
+// Single source of truth for the deadline everything is measured against.
+export const TARGET_DATE = '2026-12-31';
+
+export function countdown(targetDate = TARGET_DATE) {
   const target = new Date(targetDate + 'T00:00:00');
   const now = new Date();
   const days = Math.max(0, Math.ceil((target - now) / 864e5));
   return { weeks: Math.floor(days / 7), days };
 }
 
+// Items per day needed to finish `remaining` items by the target date.
+export function requiredPace(remaining, targetDate = TARGET_DATE) {
+  if (remaining <= 0) return null;
+  const { days } = countdown(targetDate);
+  if (days <= 0) return { remaining, days: 0, perDay: remaining, overdue: true };
+  return { remaining, days, perDay: remaining / days, overdue: false };
+}
+
 export function getDailyLogs(progress) {
   return progress.__d || {};
+}
+
+export function getCompletionLogs(progress) {
+  return progress.__c || {};
 }
 
 export function calcStreak(dailyLogs) {
@@ -64,22 +79,43 @@ export function calcStreak(dailyLogs) {
 }
 
 export function calcVelocity(dailyLogs) {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // How many days has tracking actually been active? Averaging over a fixed 7
+  // would understate the rate when there are fewer than 7 days of history
+  // (e.g. 2 done today reads as 2/7 ≈ 0.3/day instead of 2/day), pushing the
+  // ETA absurdly far out. Divide by the elapsed window instead (1..7 days).
+  const dates = Object.keys(dailyLogs).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+  if (!dates.length) return 0;
+  const earliest = new Date(dates.sort()[0] + 'T00:00:00');
+  const daysSinceFirst = Math.floor((today - earliest) / 864e5) + 1; // inclusive
+  const window = Math.min(7, Math.max(1, daysSinceFirst));
+
   let total = 0;
-  for (let i = 0; i < 7; i++) {
+  const d = new Date(today);
+  for (let i = 0; i < window; i++) {
     total += dailyLogs[localKey(d)] || 0;
     d.setDate(d.getDate() - 1);
   }
-  return total / 7;
+  return total / window;
 }
 
 export function getHeatmapData(dailyLogs) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Default to a trailing year, but extend further back if there's older
+  // activity so the heatmap shows all history rather than a fixed window.
   const start = new Date(today);
   start.setDate(start.getDate() - 364);
+
+  const dates = Object.keys(dailyLogs).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+  if (dates.length) {
+    const earliest = new Date(dates.sort()[0] + 'T00:00:00');
+    if (earliest < start) start.setTime(earliest.getTime());
+  }
+
   start.setDate(start.getDate() - start.getDay()); // align to Sunday
 
   const weeks = [];

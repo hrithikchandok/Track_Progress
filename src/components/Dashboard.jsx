@@ -1,18 +1,41 @@
-import { overallStats, countdown, calcStreak, calcVelocity } from '../utils/progress';
+import { overallStats, countdown, calcStreak, calcVelocity, requiredPace, TARGET_DATE } from '../utils/progress';
 
-export default function Dashboard({ sections, progress, dailyLogs = {} }) {
+const fmtDate = (d) => d.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
+
+export default function Dashboard({ sections, progress, dailyLogs = {}, completionLogs = {} }) {
   const { done, total, pct } = overallStats(sections, progress);
   const { weeks, days } = countdown();
   const streak = calcStreak(dailyLogs);
-  const velocity = calcVelocity(dailyLogs);
+  const velocity = calcVelocity(completionLogs);
   const remaining = total - done;
-  const etaText = velocity > 0 && remaining > 0
-    ? (() => {
-        const eta = new Date();
-        eta.setDate(eta.getDate() + Math.ceil(remaining / velocity));
-        return eta.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
-      })()
-    : null;
+  const target = new Date(TARGET_DATE + 'T00:00:00');
+
+  // Forecast: when you'll actually finish at your current completion rate.
+  let etaText = null, trackText = null, trackAhead = false;
+  if (velocity > 0 && remaining > 0) {
+    const eta = new Date();
+    eta.setHours(0, 0, 0, 0);
+    eta.setDate(eta.getDate() + Math.ceil(remaining / velocity));
+    etaText = fmtDate(eta);
+
+    // Compare that forecast against the target date.
+    const diffDays = Math.round((target - eta) / 864e5);
+    trackAhead = diffDays >= 0;
+    const n = Math.abs(diffDays);
+    trackText = diffDays === 0
+      ? 'right on target'
+      : `${n} day${n === 1 ? '' : 's'} ${trackAhead ? 'ahead of' : 'behind'} target`;
+  }
+
+  // Pace required to finish everything left by the target date.
+  const pace = requiredPace(remaining);
+  const aimText = pace && (
+    pace.overdue
+      ? 'target date passed'
+      : pace.perDay < 1
+        ? '<1 / day to hit target'
+        : `${Math.ceil(pace.perDay)} / day to hit target`
+  );
 
   return (
     <div className="dash">
@@ -29,6 +52,14 @@ export default function Dashboard({ sections, progress, dailyLogs = {} }) {
           {etaText && (
             <div className="pace-eta">at current pace · est. <b>{etaText}</b></div>
           )}
+          {trackText && (
+            <div className={`pace-eta track ${trackAhead ? 'ahead' : 'behind'}`}>
+              {trackAhead ? '✓' : '⚠'} {trackText}
+            </div>
+          )}
+          {aimText && (
+            <div className="pace-eta">aim for <b>{aimText}</b></div>
+          )}
         </div>
       </div>
 
@@ -39,7 +70,7 @@ export default function Dashboard({ sections, progress, dailyLogs = {} }) {
           {streak === 0 ? 'No activity yet today' : streak === 1 ? 'Active today — keep it up' : `${streak} days in a row`}
         </div>
         <div className="streak-label">
-          {velocity > 0 ? `${velocity.toFixed(1)} activities / day (7-day avg)` : 'Log activity by checking off items'}
+          {velocity > 0 ? `${velocity.toFixed(1)} completions / day (recent avg)` : 'Log activity by checking off items'}
         </div>
       </div>
 
@@ -47,7 +78,7 @@ export default function Dashboard({ sections, progress, dailyLogs = {} }) {
         <div className="cd-sub">Weeks until target</div>
         <div className="cd-num">{weeks}</div>
         <div className="cd-sub">{days} days remaining</div>
-        <div className="cd-target">Target&nbsp;·&nbsp;31 Dec 2026</div>
+        <div className="cd-target">Target&nbsp;·&nbsp;{fmtDate(target)}</div>
       </div>
     </div>
   );

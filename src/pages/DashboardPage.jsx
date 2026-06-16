@@ -24,7 +24,7 @@ import InterviewsSection from '../components/InterviewsSection';
 import { usePresence } from '../hooks/usePresence';
 
 export default function DashboardPage({ userId, onSignOut }) {
-  const { sections, progress, username, initialized, saveText, dailyLogs, headerMeta, interviews, applicationsCount, todayIds, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote } = useUserData(userId);
+  const { sections, progress, username, initialized, saveText, dailyLogs, completionLogs, headerMeta, interviews, applicationsCount, todayIds, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote } = useUserData(userId);
   const liveCount = usePresence(userId);
   const clock = useDayClock();
 
@@ -171,7 +171,7 @@ export default function DashboardPage({ userId, onSignOut }) {
         onToggleFocus={handleToggleFocus}
       />
       <LiveUsers count={liveCount} soundOn={soundOn} onToggleSound={handleToggleSound} />
-      <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} />
+      <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} completionLogs={completionLogs} />
       <ActivityHeatmap dailyLogs={dailyLogs} />
       <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} />
       <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />

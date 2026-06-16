@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { sb } from '../lib/supabase';
 import { normalizeImport } from '../utils/importNormalizer';
 import { genId } from '../utils/id';
-import { getDailyLogs, todayKey } from '../utils/progress';
+import { getDailyLogs, getCompletionLogs, todayKey } from '../utils/progress';
 
 export function useUserData(userId) {
   const [sections, setSections] = useState([]);
@@ -65,15 +65,33 @@ export function useUserData(userId) {
         if (val) next[id] = true; else delete next[id];
       }
 
-      // Record daily activity for forward progress only
+      // Two separate daily logs:
+      //  __d (effort)     — every forward action (a check, or a counter bump). Drives heatmap & streak.
+      //  __c (completion) — only when an item actually completes. Drives velocity/ETA, so velocity is
+      //                     measured in the same unit (completed items) as the ETA's "remaining".
       const isProgress = typeof val === 'number'
         ? val > (prevVal || 0)
         : (val && !prevVal);
 
+      let justCompleted;
+      if (typeof val === 'number') {
+        const item = sectionsRef.current
+          .flatMap(s => s.items || [])
+          .find(i => i.id === id);
+        const target = item?.target || 1;
+        justCompleted = (prevVal || 0) < target && val >= target;
+      } else {
+        justCompleted = val && !prevVal;
+      }
+
+      const key = todayKey();
       if (isProgress) {
-        const key = todayKey();
         const logs = next.__d || {};
         next.__d = { ...logs, [key]: (logs[key] || 0) + 1 };
+      }
+      if (justCompleted) {
+        const clogs = next.__c || {};
+        next.__c = { ...clogs, [key]: (clogs[key] || 0) + 1 };
       }
 
       persist(sectionsRef.current, next);
@@ -155,6 +173,7 @@ export function useUserData(userId) {
   }, [persist]);
 
   const dailyLogs = getDailyLogs(progress);
+  const completionLogs = getCompletionLogs(progress);
 
   const interviews       = progress.__iv       || [];
   const applicationsCount = progress.__appCount || 0;
@@ -241,7 +260,7 @@ export function useUserData(userId) {
   }, [persist]);
 
   return {
-    sections, progress, username, initialized, saveText, dailyLogs, headerMeta,
+    sections, progress, username, initialized, saveText, dailyLogs, completionLogs, headerMeta,
     interviews, applicationsCount, todayIds,
     toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta,
     saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote,
