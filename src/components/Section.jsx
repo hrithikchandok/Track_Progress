@@ -1,6 +1,20 @@
 import { secProgress } from '../utils/progress';
 import TaskItem from './TaskItem';
 
+// Editorial tag-chip palette keyed by track (text / soft-fill). Falls back to
+// the section's own color for any track not in the design's token table.
+const TAG_COLORS = {
+  DSA: ['#0E7C5A', '#E3F1EB'],
+  HLD: ['#7C3AED', '#F0E9FE'],
+  LLD: ['#2563EB', '#E5EDFD'],
+  JAVA: ['#C2740E', '#FBEFDD'],
+  SPRINGBOOT: ['#1F9D55', '#E4F3E9'],
+};
+
+function tagColors(tag, fallback = '#157A57') {
+  return TAG_COLORS[tag] || [fallback, fallback + '1A'];
+}
+
 export default function Section({ section, progress, isOpen, activeFilter, canEdit, isEditMode, todayIds, onToggle, onToggleToday, onReviseSection, onSaveNote, onSectionToggle, onDeleteSection, onAddItem, onDeleteItem }) {
   const { pct, done, total, label } = secProgress(section, progress);
   const isVisible = activeFilter === 'all' || section.track === activeFilter;
@@ -57,15 +71,21 @@ export default function Section({ section, progress, isOpen, activeFilter, canEd
     </div>
   );
 
+  const tag = (section.track || section.id || '').toUpperCase();
+  const [tagFg, tagBg] = tagColors(tag, section.color);
+
   return (
     <div className={`section${section.sup ? ' sup' : ''}${isOpen ? ' open' : ''}`} data-id={section.id}>
       <div className="sec-head" onClick={() => !isEditMode && onSectionToggle(section.id)}>
-        <span className="sec-bullet" style={{ background: section.color }}></span>
+        <span className="sec-tag" style={{ color: tagFg, background: tagBg }}>{tag}</span>
         <span className="sec-title">
           {section.title} <span className="tiny">· {section.sub}</span>
         </span>
         {revButtons}
         <span className="sec-meta">{label}</span>
+        {!isOpen && !isEditMode && (
+          <span className="sec-minibar"><i style={{ width: `${pct}%` }}></i></span>
+        )}
         {isEditMode ? (
           <div className="edit-actions" onClick={e => e.stopPropagation()}>
             <button className="edit-btn" onClick={() => onAddItem(section.id)} title="Add item">+ item</button>
@@ -75,9 +95,11 @@ export default function Section({ section, progress, isOpen, activeFilter, canEd
           <span className="sec-chev">▸</span>
         )}
       </div>
-      <div className="miniprog">
-        <i style={{ width: `${pct}%`, background: section.color }}></i>
-      </div>
+      {isOpen && (
+        <div className="miniprog">
+          <i style={{ width: `${pct}%` }}></i>
+        </div>
+      )}
       <div className="sec-body">
         {rows}
         {isEditMode && (

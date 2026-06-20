@@ -117,7 +117,7 @@ export default function Header({ meta = {}, onSaveMeta, focusMode, onToggleFocus
           <EditableText
             value={role}
             onSave={v => save({ role: v })}
-            className=""
+            className="role-accent"
             inputClassName="header-edit-input header-edit-role"
             placeholder="e.g. Java · Backend"
           />

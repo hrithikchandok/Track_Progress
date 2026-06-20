@@ -17,7 +17,7 @@ export default function TodayPanel({ items, progress, clock, dread, onToggle, on
   const critical = dread > 0.5;
 
   return (
-    <div className={`today-panel${remaining > 0 ? ' has-pending' : ''}${allDone ? ' all-done' : ''}${critical ? ' critical' : ''}`}>
+    <div id="today-panel" className={`today-panel${remaining > 0 ? ' has-pending' : ''}${allDone ? ' all-done' : ''}${critical ? ' critical' : ''}`}>
       <div className="today-head">
         <span className="today-label">◎ Today</span>
         {total > 0 && <span className="today-count">{done}/{total} done</span>}

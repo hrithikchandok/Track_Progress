@@ -27,6 +27,14 @@ const VERDICT = {
   pending:  { label: 'Pending',  color: 'var(--muted)' },
 };
 
+// Editorial status pills for the past-interviews list (text / soft-fill).
+const STATUS_PILL = {
+  selected: { fg: '#0F8A5F', bg: 'rgba(15,138,95,.12)' },
+  rejected: { fg: '#C0392B', bg: 'rgba(192,57,43,.10)' },
+  upcoming: { fg: '#157A57', bg: 'rgba(21,122,87,.10)' },
+  pending:  { fg: '#6F6A60', bg: 'rgba(111,106,96,.10)' },
+};
+
 // ── Sub-components ──────────────────────────────────────────────────────────
 
 function CompanyLogo({ company, domain, size = 28 }) {
@@ -126,7 +134,7 @@ function MiniCalendar({ interviews, onDayClick, selectedDate }) {
               onClick={() => onDayClick(k)}
             >
               {day}
-              {dotC && <span className="iv-cal-dot" style={{ background: dotC }} />}
+              {dotC && <span className="iv-cal-dot" style={{ background: k === today ? '#fff' : dotC }} />}
             </button>
           );
         })}
@@ -162,19 +170,18 @@ function UpcomingCard({ iv, onClick }) {
 
 // ── Past card ───────────────────────────────────────────────────────────────
 
-function PastCard({ iv, onClick }) {
+function PastRow({ iv, onClick }) {
+  const pill = STATUS_PILL[iv.status] || STATUS_PILL.upcoming;
+  const label = (VERDICT[iv.status] || VERDICT.upcoming).label.toUpperCase();
   return (
-    <div className="iv-past-card" onClick={onClick}>
-      <CompanyLogo company={iv.company} domain={iv.companyDomain} size={32} />
-      <div style={{ flex: 1, minWidth: 0 }}>
+    <div className="iv-past-row" onClick={onClick}>
+      <div style={{ minWidth: 0 }}>
         <div className="iv-past-company">{iv.company}</div>
         <div className="iv-past-role">{iv.role}</div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-        <VerdictBadge status={iv.status} />
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--faint)' }}>
-          {fmtDate(iv.date, { month: 'short', day: 'numeric', year: 'numeric' })}
-        </div>
+      <div className="iv-past-right">
+        <span className="iv-status-pill" style={{ color: pill.fg, background: pill.bg }}>{label}</span>
+        <span className="iv-past-date">{fmtDate(iv.date, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
       </div>
     </div>
   );
@@ -372,18 +379,14 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
   return (
     <div className={`iv-section${isOpen ? ' iv-open' : ''}`}>
       {/* ── Header ── */}
-      <div
-        className="iv-section-head"
-        onClick={() => setIsOpen(v => !v)}
-        style={{ cursor: 'pointer' }}
-      >
+      <div className="iv-section-head">
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <div className="kicker">Interviews</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="iv-title" onClick={() => setIsOpen(v => !v)} style={{ cursor: 'pointer' }}>Interviews</span>
             <span className="iv-month-badge">{thisMonthCount} this {monthName}</span>
           </div>
           {applicationsCount > 0 && (
-            <div className="iv-conversion" onClick={e => e.stopPropagation()}>
+            <div className="iv-conversion">
               <span className="iv-conv-num">{interviews.length}</span>
               <span className="iv-conv-sep"> interviews from </span>
               <button
@@ -397,23 +400,22 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
             </div>
           )}
         </div>
+        <span className="iv-chev" onClick={() => setIsOpen(v => !v)} style={{ cursor: 'pointer' }}>{isOpen ? '▾' : '▸'}</span>
+      </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-          <div className="iv-stats-row" onClick={e => e.stopPropagation()}>
-            {[
-              { num: interviews.length, lbl: 'Total',    col: 'var(--text)' },
-              { num: upcoming.length,   lbl: 'Upcoming', col: 'var(--accent)' },
-              { num: selectedCount,     lbl: 'Selected', col: 'var(--proc)' },
-              { num: rejectedCount,     lbl: 'Rejected', col: 'var(--core)' },
-            ].map(({ num, lbl, col }) => (
-              <div key={lbl} className="iv-stat">
-                <span className="iv-stat-num" style={{ color: col }}>{num}</span>
-                <span className="iv-stat-lbl">{lbl}</span>
-              </div>
-            ))}
+      {/* ── Stat cards (4-up) ── */}
+      <div className="iv-stat-cards">
+        {[
+          { num: interviews.length, lbl: 'Total',    col: 'var(--text)' },
+          { num: upcoming.length,   lbl: 'Upcoming', col: 'var(--text)' },
+          { num: selectedCount,     lbl: 'Selected', col: '#0F8A5F' },
+          { num: rejectedCount,     lbl: 'Rejected', col: '#C0392B' },
+        ].map(({ num, lbl, col }) => (
+          <div key={lbl} className="iv-stat-card">
+            <div className="n" style={{ color: col }}>{num}</div>
+            <div className="l">{lbl}</div>
           </div>
-          <span className="iv-chev">{isOpen ? '▾' : '▸'}</span>
-        </div>
+        ))}
       </div>
 
       {/* ── Body ── */}
@@ -426,42 +428,45 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
             selectedDate={selectedDay}
           />
 
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div className="iv-list-label">
-                {selectedDay
-                  ? `${fmtDate(selectedDay, { month: 'short', day: 'numeric' })} — ${shownUpcoming.length || 'no'} interview${shownUpcoming.length !== 1 ? 's' : ''}`
-                  : 'Upcoming'}
+          {(selectedDay || shownUpcoming.length > 0) && (
+            <div style={{ marginTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div className="iv-list-label">
+                  {selectedDay
+                    ? `${fmtDate(selectedDay, { month: 'short', day: 'numeric' })} — ${shownUpcoming.length || 'no'} interview${shownUpcoming.length !== 1 ? 's' : ''}`
+                    : 'Upcoming'}
+                </div>
+                {selectedDay && (
+                  <button className="iv-clear-sel" onClick={() => setSelectedDay(null)}>× clear</button>
+                )}
               </div>
-              {selectedDay && (
-                <button className="iv-clear-sel" onClick={() => setSelectedDay(null)}>× clear</button>
+
+              {shownUpcoming.length === 0 ? (
+                <div style={{ color: 'var(--faint)', fontFamily: 'var(--mono)', fontSize: 12, padding: '6px 0' }}>
+                  {selectedDay ? 'No interviews on this day' : 'No upcoming interviews scheduled'}
+                </div>
+              ) : (
+                shownUpcoming.map(iv => (
+                  <UpcomingCard key={iv.id} iv={iv} onClick={() => setDetailIv(iv)} />
+                ))
               )}
             </div>
-
-            {shownUpcoming.length === 0 ? (
-              <div style={{ color: 'var(--faint)', fontFamily: 'var(--mono)', fontSize: 12, padding: '6px 0' }}>
-                {selectedDay ? 'No interviews on this day' : 'No upcoming interviews scheduled'}
-              </div>
-            ) : (
-              shownUpcoming.map(iv => (
-                <UpcomingCard key={iv.id} iv={iv} onClick={() => setDetailIv(iv)} />
-              ))
-            )}
-
-            <button className="iv-add-btn" onClick={openAdd}>+ Schedule Interview</button>
-          </div>
+          )}
         </div>
 
-        {/* Right: past interviews sidebar */}
-        <div className="iv-sidebar">
-          <div className="iv-list-label" style={{ marginBottom: 10 }}>Past Interviews</div>
+        {/* Right: past interviews list */}
+        <div className="iv-card">
+          <div className="iv-past">
+            <span className="iv-past-head">Past interviews</span>
+            <button className="iv-past-add" onClick={openAdd}>+ Schedule</button>
+          </div>
           {past.length === 0 ? (
             <div style={{ color: 'var(--faint)', fontFamily: 'var(--mono)', fontSize: 11, padding: '6px 0' }}>
               No past interviews yet
             </div>
           ) : (
             past.map(iv => (
-              <PastCard key={iv.id} iv={iv} onClick={() => setDetailIv(iv)} />
+              <PastRow key={iv.id} iv={iv} onClick={() => setDetailIv(iv)} />
             ))
           )}
         </div>

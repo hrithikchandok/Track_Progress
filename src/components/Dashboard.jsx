@@ -40,32 +40,28 @@ export default function Dashboard({ sections, progress, dailyLogs = {}, completi
   return (
     <div className="dash">
       <div className="card count">
-        <div>
-          <div className="overall-label">Overall completion</div>
-          <div className="big-pct">{pct}<span>%</span></div>
+        <div className="overall-label">Overall completion</div>
+        <div className="big-pct">{pct}<span>%</span></div>
+        <div className="overall-bar">
+          <i style={{ width: `${pct}%` }}></i>
         </div>
-        <div>
-          <div className="overall-bar">
-            <i style={{ width: `${pct}%` }}></i>
+        <div className="done-count">{done} / {total} items done</div>
+        {etaText && (
+          <div className="pace-eta">at current pace · est. <b>{etaText}</b></div>
+        )}
+        {trackText && (
+          <div className={`pace-eta track ${trackAhead ? 'ahead' : 'behind'}`}>
+            {trackAhead ? '✓' : '⚠'} {trackText}
           </div>
-          <div className="done-count">{done} / {total} items done</div>
-          {etaText && (
-            <div className="pace-eta">at current pace · est. <b>{etaText}</b></div>
-          )}
-          {trackText && (
-            <div className={`pace-eta track ${trackAhead ? 'ahead' : 'behind'}`}>
-              {trackAhead ? '✓' : '⚠'} {trackText}
-            </div>
-          )}
-          {aimText && (
-            <div className="pace-eta">aim for <b>{aimText}</b></div>
-          )}
-        </div>
+        )}
+        {aimText && (
+          <div className="pace-eta">aim for <b>{aimText}</b></div>
+        )}
       </div>
 
       <div className="card streak-card">
         <div className="overall-label">Current streak</div>
-        <div className="streak-num">{streak}<span style={{ fontSize: 24, color: 'var(--faint)' }}> days</span></div>
+        <div className="streak-num">{streak}<span style={{ fontSize: 20, color: 'var(--faint)' }}> days</span></div>
         <div className="streak-sub">
           {streak === 0 ? 'No activity yet today' : streak === 1 ? 'Active today — keep it up' : `${streak} days in a row`}
         </div>
@@ -75,7 +71,7 @@ export default function Dashboard({ sections, progress, dailyLogs = {}, completi
       </div>
 
       <div className="card countdown">
-        <div className="cd-sub">Weeks until target</div>
+        <div className="overall-label">Weeks until target</div>
         <div className="cd-num">{weeks}</div>
         <div className="cd-sub">{days} days remaining</div>
         <div className="cd-target">Target&nbsp;·&nbsp;{fmtDate(target)}</div>

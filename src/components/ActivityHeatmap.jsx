@@ -1,12 +1,20 @@
-import { getHeatmapData } from '../utils/progress';
+// GitHub-style contribution grid for the full calendar year (Jan → Dec).
+// Week columns are flexible (flex: 1 1 0) so the grid fills the card edge-to-edge;
+// cells are square. Real activity from `dailyLogs` is bucketed into 4 levels.
 
-const HEAT_COLORS = [
-  'var(--panel-2)',
-  'rgba(245,181,68,0.25)',
-  'rgba(245,181,68,0.5)',
-  'rgba(245,181,68,0.75)',
-  'var(--accent)',
+const EMPTY = '#E6E0D4';
+const LEVELS = [
+  'rgba(21,122,87,0.30)',
+  'rgba(21,122,87,0.52)',
+  'rgba(21,122,87,0.74)',
+  '#157A57',
 ];
+const LEGEND = [EMPTY, ...LEVELS];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function localKey(d) {
+  return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
+}
 
 function heatLevel(count) {
   if (count === 0) return 0;
@@ -16,20 +24,34 @@ function heatLevel(count) {
   return 4;
 }
 
-export default function ActivityHeatmap({ dailyLogs = {} }) {
-  const weeks = getHeatmapData(dailyLogs);
+function buildYear(dailyLogs, year) {
+  const jan1 = new Date(year, 0, 1);
+  const cur = new Date(year, 0, 1 - jan1.getDay()); // Sunday on/before Jan 1
+  const end = new Date(year, 11, 31);
+  const weeks = [];
+  const monthAt = {};
+  let wi = 0, lastMonth = -1;
 
-  const monthLabels = weeks.map((week, wi) => {
-    const first = week.find(d => d !== null);
-    if (!first) return null;
-    const prevFirst = wi > 0 ? weeks[wi - 1].find(d => d !== null) : null;
-    if (!prevFirst || first.date.slice(0, 7) !== prevFirst.date.slice(0, 7)) {
-      return new Date(first.date + 'T00:00:00').toLocaleString('default', { month: 'short' });
+  while (cur <= end) {
+    const col = [];
+    for (let d = 0; d < 7; d++) {
+      const inYear = cur.getFullYear() === year;
+      const m = cur.getMonth();
+      if (d === 0 && inYear && m !== lastMonth) { monthAt[wi] = MONTHS[m]; lastMonth = m; }
+      const key = localKey(cur);
+      col.push({ inYear, key, count: inYear ? (dailyLogs[key] || 0) : 0 });
+      cur.setDate(cur.getDate() + 1);
     }
-    return null;
-  });
+    weeks.push(col);
+    wi++;
+  }
+  return { weeks, monthAt };
+}
 
-  const totalActivity = Object.entries(dailyLogs).reduce((a, [k, v]) => k === '__d' ? a : a + v, 0);
+export default function ActivityHeatmap({ dailyLogs = {} }) {
+  const year = new Date().getFullYear();
+  const { weeks, monthAt } = buildYear(dailyLogs, year);
+  const totalActivity = Object.entries(dailyLogs).reduce((a, [k, v]) => (k === '__d' ? a : a + v), 0);
 
   return (
     <div className="heatmap-section">
@@ -38,57 +60,44 @@ export default function ActivityHeatmap({ dailyLogs = {} }) {
         <span className="heatmap-total">{totalActivity} total</span>
       </div>
 
-      <div className="heatmap-scroll">
-        {/* Month labels */}
-        <div style={{ display: 'flex', gap: 2, marginLeft: 24, marginBottom: 4 }}>
+      <div style={{ width: '100%' }}>
+        {/* Month labels — aligned to the first week-column of each month */}
+        <div style={{ display: 'flex', gap: 3, marginBottom: 7 }}>
           {weeks.map((_, wi) => (
-            <div key={wi} style={{ width: 11, flexShrink: 0, overflow: 'visible', whiteSpace: 'nowrap', fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--faint)' }}>
-              {monthLabels[wi] || ''}
+            <div key={wi} style={{ flex: '1 1 0', minWidth: 0, fontFamily: 'var(--mono)', fontSize: 10, color: '#9A958A', letterSpacing: '.02em', whiteSpace: 'nowrap', overflow: 'visible' }}>
+              {monthAt[wi] || ''}
             </div>
           ))}
         </div>
 
-        {/* Grid */}
-        <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
-          {/* Day labels */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: 20, textAlign: 'right', paddingRight: 2 }}>
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-              <div key={i} style={{ height: 11, lineHeight: '11px', fontFamily: 'var(--mono)', fontSize: 8, color: 'var(--faint)', visibility: [1, 3, 5].includes(i) ? 'visible' : 'hidden' }}>
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Week columns */}
-          <div style={{ display: 'flex', gap: 2 }}>
-            {weeks.map((week, wi) => (
-              <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {week.map((day, di) => (
-                  <div
-                    key={di}
-                    title={day ? `${day.date}: ${day.count} ${day.count === 1 ? 'activity' : 'activities'}` : ''}
-                    style={{
-                      width: 11,
-                      height: 11,
-                      borderRadius: 2,
-                      background: day ? HEAT_COLORS[heatLevel(day.count)] : 'transparent',
-                      border: day ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                    }}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, marginLeft: 24 }}>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--faint)', marginRight: 4 }}>Less</span>
-          {HEAT_COLORS.map((c, i) => (
-            <div key={i} style={{ width: 11, height: 11, borderRadius: 2, background: c, border: '1px solid rgba(255,255,255,0.04)' }} />
+        {/* Week columns */}
+        <div style={{ display: 'flex', gap: 3 }}>
+          {weeks.map((col, wi) => (
+            <div key={wi} style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {col.map((day, di) => (
+                <div
+                  key={di}
+                  title={day.inYear ? `${day.key}: ${day.count} ${day.count === 1 ? 'activity' : 'activities'}` : ''}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 1',
+                    borderRadius: 2,
+                    background: day.inYear ? (day.count === 0 ? EMPTY : LEVELS[heatLevel(day.count) - 1]) : 'transparent',
+                  }}
+                />
+              ))}
+            </div>
           ))}
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--faint)', marginLeft: 4 }}>More</span>
         </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginTop: 14, fontFamily: 'var(--mono)', fontSize: 10, color: '#A9A498' }}>
+        Less
+        {LEGEND.map((c, i) => (
+          <span key={i} style={{ width: 11, height: 11, borderRadius: 2, background: c }} />
+        ))}
+        More
       </div>
     </div>
   );
