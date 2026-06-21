@@ -23,6 +23,8 @@ import ActivityHeatmap from '../components/ActivityHeatmap';
 import InterviewsSection from '../components/InterviewsSection';
 import { usePresence } from '../hooks/usePresence';
 
+const pad = n => String(n).padStart(2, '0');
+
 export default function DashboardPage({ userId, onSignOut }) {
   const { sections, progress, username, initialized, saveText, dailyLogs, completionLogs, headerMeta, interviews, applicationsCount, todayIds, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote } = useUserData(userId);
   const liveCount = usePresence(userId);
@@ -38,6 +40,21 @@ export default function DashboardPage({ userId, onSignOut }) {
   const [focusMode, setFocusMode] = useState(() => localStorage.getItem('focusMode') === '1');
   const [soundOn, setSoundOn] = useState(() => localStorage.getItem('sfx') !== '0');
   const [quote, setQuote] = useState(null);
+  const [showMini, setShowMini] = useState(false);
+
+  // Surface the day-clock as a compact pill in the sticky nav once the big
+  // Today panel scrolls out of reach (its bottom passes above the nav).
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.getElementById('today-panel');
+      if (!el) return;
+      const past = el.getBoundingClientRect().bottom < 64;
+      setShowMini(prev => (prev === past ? prev : past));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   function handleToggleFocus() {
     setFocusMode(prev => {
@@ -162,6 +179,19 @@ export default function DashboardPage({ userId, onSignOut }) {
       <TopNav
         active="tracker"
         links={[{ key: 'tracker', label: '◷ Tracker', to: '/' }, { key: 'articles', label: '✎ Articles', to: '/articles' }]}
+        right={(
+          <>
+            {showMini && (
+              <span className="nav-clock">
+                <i className="nav-clock-dot">◎</i>
+                <span className="nav-clock-time">{pad(clock.hours)}:{pad(clock.minutes)}:{pad(clock.seconds)}</span>
+                <span className="nav-clock-label">left today</span>
+              </span>
+            )}
+            {username && <a className="topnav-ext" href={`/u/${username}`} target="_blank" rel="noopener noreferrer">↗ Public view</a>}
+            {onSignOut && <button className="topnav-signout" onClick={onSignOut}>Sign out</button>}
+          </>
+        )}
       />
       <Header
         meta={headerMeta}

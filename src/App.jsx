@@ -1,11 +1,9 @@
-import { useState, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import PublicPage from './pages/PublicPage';
-import BackgroundCanvas from './components/BackgroundCanvas';
-import BgPicker from './components/BgPicker';
 
 // Article pages pull in TipTap + highlight.js — load them only on demand.
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
@@ -23,17 +21,9 @@ function AuthGate({ session, loading, signIn, signUp, signOut }) {
 
 export default function App() {
   const { session, loading, signIn, signUp, signOut } = useAuth();
-  const [bgMode, setBgMode] = useState(() => localStorage.getItem('bgMode') || 'off');
-
-  function handleBgChange(mode) {
-    setBgMode(mode);
-    localStorage.setItem('bgMode', mode);
-  }
 
   return (
     <BrowserRouter>
-      <BackgroundCanvas mode={bgMode} />
-      {session && <BgPicker mode={bgMode} onChange={handleBgChange} />}
       <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/u/:username" element={<PublicPage />} />
