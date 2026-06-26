@@ -390,25 +390,7 @@ header { position: relative; }
 @keyframes pdot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
 .live-count { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 500; font-size: 12px; color: var(--muted); }
 
-/* Sound (engine FX) toggle */
-.sfx-toggle { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--muted); cursor: pointer; transition: .15s; }
-.sfx-toggle:hover { border-color: var(--faint); color: var(--text); }
-.sfx-toggle.on { border-color: rgba(21,122,87,.4); color: var(--accent); background: var(--accent-soft); }
-.sfx-glyph { font-size: 12px; line-height: 1; }
 
-/* Completion quote toast */
-.quote-toast {
-  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%);
-  z-index: 70; display: flex; align-items: center; gap: 10px;
-  background: var(--panel); border: 1px solid rgba(21,122,87,.4); border-radius: 12px;
-  padding: 12px 18px; max-width: 90vw;
-  box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 18px rgba(21,122,87,.15);
-  animation: quoteIn .35s cubic-bezier(.2,.9,.3,1.3), quoteOut .4s ease 9.6s forwards;
-}
-.quote-flag { font-size: 18px; flex-shrink: 0; }
-.quote-text { font-family: var(--mono); font-size: 12.5px; color: var(--text); letter-spacing: .01em; }
-@keyframes quoteIn { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
-@keyframes quoteOut { to { opacity: 0; transform: translate(-50%, 16px); } }
 
 /* ── Interviews Section ───────────────────────── */
 .iv-section { margin-bottom: 28px; display: flex; flex-direction: column; gap: 16px; }
