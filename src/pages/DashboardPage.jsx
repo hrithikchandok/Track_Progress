@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useUserData } from '../hooks/useUserData';
 import { useDayClock } from '../hooks/useDayClock';
 import { itemDone } from '../utils/progress';
-import { playF1Rev } from '../utils/sfx';
-import { randomQuote } from '../data/quotes';
+import { fireConfetti } from '../utils/confetti';
 import { genId } from '../utils/id';
 import Header from '../components/Header';
 import TopNav from '../components/TopNav';
@@ -37,8 +36,6 @@ export default function DashboardPage({ userId, onSignOut }) {
   const [showLinkImport, setShowLinkImport] = useState(false);
   const [addItemTo, setAddItemTo] = useState(null);
   const [focusMode, setFocusMode] = useState(() => localStorage.getItem('focusMode') === '1');
-  const [soundOn, setSoundOn] = useState(() => localStorage.getItem('sfx') !== '0');
-  const [quote, setQuote] = useState(null);
   const [showMini, setShowMini] = useState(false);
 
   // Surface the day-clock as a compact pill in the sticky nav once the big
@@ -63,17 +60,8 @@ export default function DashboardPage({ userId, onSignOut }) {
     });
   }
 
-  function handleToggleSound() {
-    setSoundOn(prev => {
-      const next = !prev;
-      localStorage.setItem('sfx', next ? '1' : '0');
-      if (next) playF1Rev(); // preview + unlock the audio context on this user gesture
-      return next;
-    });
-  }
-
-  // Wraps the data-layer toggle: when a task crosses into "done", rev the engine
-  // and flash a random motivational quote.
+  // Wraps the data-layer toggle: when a task crosses into "done", fire the
+  // confetti celebration.
   function handleToggle(id, val) {
     const item = sections.flatMap(s => s.items || []).find(i => i.id === id);
     if (item) {
@@ -81,19 +69,10 @@ export default function DashboardPage({ userId, onSignOut }) {
       const justDone = (item.type || 'boolean') === 'counter'
         ? val >= (item.target || 1) && (prev || 0) < (item.target || 1)
         : val === true && !prev;
-      if (justDone) {
-        if (soundOn) playF1Rev();
-        setQuote({ text: randomQuote(), id: Date.now() });
-      }
+      if (justDone) fireConfetti();
     }
     toggle(id, val);
   }
-
-  useEffect(() => {
-    if (!quote) return;
-    const t = setTimeout(() => setQuote(null), 10000);
-    return () => clearTimeout(t);
-  }, [quote]);
 
   // Auto-open first 3 sections whenever sections first load or are replaced by import
   useEffect(() => {
@@ -193,7 +172,7 @@ export default function DashboardPage({ userId, onSignOut }) {
         focusAvailable={hasPending}
         onToggleFocus={handleToggleFocus}
       />
-      <LiveUsers count={liveCount} soundOn={soundOn} onToggleSound={handleToggleSound} />
+      <LiveUsers count={liveCount} />
       <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} completionLogs={completionLogs} />
       <ActivityHeatmap dailyLogs={dailyLogs} />
       <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
@@ -241,13 +220,6 @@ export default function DashboardPage({ userId, onSignOut }) {
         onReset={resetAll}
         onSignOut={onSignOut}
       />
-
-      {quote && (
-        <div className="quote-toast" key={quote.id}>
-          <span className="quote-flag">🏁</span>
-          <span className="quote-text">{quote.text}</span>
-        </div>
-      )}
 
       {showShareModal && <ShareModal currentUsername={username} onSave={saveUsername} onClose={() => setShowShareModal(false)} />}
       {showLinkImport && <LinkImportModal onImport={handleLinkImport} onClose={() => setShowLinkImport(false)} />}
