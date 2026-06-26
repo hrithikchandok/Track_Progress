@@ -5,7 +5,6 @@ import Header from '../components/Header';
 import TopNav from '../components/TopNav';
 import Dashboard from '../components/Dashboard';
 import TrackBars from '../components/TrackBars';
-import FilterBar from '../components/FilterBar';
 import SectionList from '../components/SectionList';
 
 export default function PublicPage() {
@@ -62,8 +61,7 @@ export default function PublicPage() {
       </div>
       <Header />
       <Dashboard sections={sections} progress={progress} />
-      <TrackBars sections={sections} progress={progress} />
-      <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={f => {
+      <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} onFilterChange={f => {
         setActiveFilter(f);
         if (f !== 'all') setOpenSections(new Set(sections.map(s => s.id)));
       }} />

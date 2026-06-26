@@ -38,6 +38,47 @@ function EditableText({ value, onSave, className, inputClassName, placeholder })
   );
 }
 
+// Company targets edit as one comma-separated field but display as the design's
+// row of outlined chips (Mono, 1px hairline, radius 4px).
+function EditableChips({ value, onSave, placeholder }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  function startEdit() { setDraft(value); setEditing(true); }
+
+  function save() {
+    onSave(draft.trim());
+    setEditing(false);
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter') save();
+    if (e.key === 'Escape') setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        className="header-edit-input header-edit-company"
+        value={draft}
+        placeholder={placeholder}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={save}
+        onKeyDown={handleKey}
+      />
+    );
+  }
+
+  const chips = value.split(',').map(c => c.trim()).filter(Boolean);
+  return (
+    <div className="company-chips editable-hdr" onClick={startEdit} title="Click to edit">
+      {chips.map((c, i) => <span key={i} className="company-chip">{c}</span>)}
+      <span className="edit-pencil">✎</span>
+    </div>
+  );
+}
+
 function EditableBlock({ value, onSave, className, placeholder }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -126,12 +167,10 @@ export default function Header({ meta = {}, onSaveMeta, focusMode, onToggleFocus
 
       <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
         {company ? (
-          <EditableText
+          <EditableChips
             value={company}
             onSave={v => save({ company: v })}
-            className="sub company-tag"
-            inputClassName="header-edit-input header-edit-company"
-            placeholder="e.g. Google, Amazon"
+            placeholder="e.g. Google, Amazon, LinkedIn"
           />
         ) : (
           <button
