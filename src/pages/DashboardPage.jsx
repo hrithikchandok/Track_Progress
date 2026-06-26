@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUserData } from '../hooks/useUserData';
-import { useDayClock, dreadLevel } from '../hooks/useDayClock';
+import { useDayClock } from '../hooks/useDayClock';
 import { itemDone } from '../utils/progress';
 import { playF1Rev } from '../utils/sfx';
 import { randomQuote } from '../data/quotes';
@@ -10,7 +10,6 @@ import TopNav from '../components/TopNav';
 import TodayPanel from '../components/TodayPanel';
 import Dashboard from '../components/Dashboard';
 import TrackBars from '../components/TrackBars';
-import FilterBar from '../components/FilterBar';
 import SectionList from '../components/SectionList';
 import Footer from '../components/Footer';
 import OnboardingModal from '../components/OnboardingModal';
@@ -163,19 +162,13 @@ export default function DashboardPage({ userId, onSignOut }) {
   const targetSection = sections.find(s => s.id === addItemTo);
 
   // Resolve the Today list (ids → item objects), preserving the order they were starred.
-  const itemsById = new Map(sections.flatMap(s => s.items || []).map(i => [i.id, i]));
+  const itemsById = new Map(sections.flatMap(s => (s.items || []).map(i => [i.id, { ...i, track: s.track }])));
   const todayItems = todayIds.map(id => itemsById.get(id)).filter(Boolean);
   const pendingToday = todayItems.filter(i => !itemDone(i, progress));
   const hasPending = pendingToday.length > 0;
 
-  // Background reddens naturally as the day burns down with unfinished tasks.
-  // Focus mode slams it to near-max immediately to crank the pressure.
-  const baseDread = dreadLevel(clock.elapsed, hasPending);
-  const dread = hasPending && focusMode ? Math.max(baseDread, 0.88) : baseDread;
-
   return (
-    <div className={`wrap${dread > 0.02 ? ' degrade' : ''}`} style={{ '--dread': dread }}>
-      {dread > 0.02 && <div className="dread-overlay" style={{ opacity: dread }} />}
+    <div className="wrap">
       <TopNav
         active="tracker"
         links={[{ key: 'tracker', label: '◷ Tracker', to: '/' }, { key: 'articles', label: '✎ Articles', to: '/articles' }]}
@@ -203,13 +196,11 @@ export default function DashboardPage({ userId, onSignOut }) {
       <LiveUsers count={liveCount} soundOn={soundOn} onToggleSound={handleToggleSound} />
       <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} completionLogs={completionLogs} />
       <ActivityHeatmap dailyLogs={dailyLogs} />
-      <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} />
-      <FilterBar sections={sections} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
+      <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
       <TodayPanel
         items={todayItems}
         progress={progress}
         clock={clock}
-        dread={dread}
         onToggle={handleToggle}
         onToggleToday={toggleTodayItem}
       />
