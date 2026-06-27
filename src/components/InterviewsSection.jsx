@@ -29,10 +29,10 @@ const VERDICT = {
 
 // Editorial status pills for the past-interviews list (text / soft-fill).
 const STATUS_PILL = {
-  selected: { fg: '#0F8A5F', bg: 'rgba(15,138,95,.12)' },
-  rejected: { fg: '#C0392B', bg: 'rgba(192,57,43,.10)' },
-  upcoming: { fg: '#157A57', bg: 'rgba(21,122,87,.10)' },
-  pending:  { fg: '#6F6A60', bg: 'rgba(111,106,96,.10)' },
+  selected: { fg: 'var(--accent-text)', bg: 'var(--ok-soft)' },
+  rejected: { fg: 'var(--danger)', bg: 'var(--danger-soft)' },
+  upcoming: { fg: 'var(--accent)', bg: 'var(--accent-soft)' },
+  pending:  { fg: 'var(--muted)', bg: 'var(--track)' },
 };
 
 // ── Sub-components ──────────────────────────────────────────────────────────
@@ -408,8 +408,8 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
         {[
           { num: interviews.length, lbl: 'Total',    col: 'var(--text)' },
           { num: upcoming.length,   lbl: 'Upcoming', col: 'var(--text)' },
-          { num: selectedCount,     lbl: 'Selected', col: '#0F8A5F' },
-          { num: rejectedCount,     lbl: 'Rejected', col: '#C0392B' },
+          { num: selectedCount,     lbl: 'Selected', col: 'var(--accent-text)' },
+          { num: rejectedCount,     lbl: 'Rejected', col: 'var(--danger)' },
         ].map(({ num, lbl, col }) => (
           <div key={lbl} className="iv-stat-card">
             <div className="n" style={{ color: col }}>{num}</div>

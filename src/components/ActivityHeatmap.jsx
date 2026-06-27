@@ -2,12 +2,12 @@
 // Week columns are flexible (flex: 1 1 0) so the grid fills the card edge-to-edge;
 // cells are square. Real activity from `dailyLogs` is bucketed into 4 levels.
 
-const EMPTY = '#E6E0D4';
+const EMPTY = 'var(--heat0)';
 const LEVELS = [
-  'rgba(21,122,87,0.30)',
-  'rgba(21,122,87,0.52)',
-  'rgba(21,122,87,0.74)',
-  '#157A57',
+  'var(--heat1)',
+  'var(--heat2)',
+  'var(--heat3)',
+  'var(--heat4)',
 ];
 const LEGEND = [EMPTY, ...LEVELS];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -64,7 +64,7 @@ export default function ActivityHeatmap({ dailyLogs = {} }) {
         {/* Month labels — aligned to the first week-column of each month */}
         <div style={{ display: 'flex', gap: 3, marginBottom: 7 }}>
           {weeks.map((_, wi) => (
-            <div key={wi} style={{ flex: '1 1 0', minWidth: 0, fontFamily: 'var(--mono)', fontSize: 10, color: '#9A958A', letterSpacing: '.02em', whiteSpace: 'nowrap', overflow: 'visible' }}>
+            <div key={wi} style={{ flex: '1 1 0', minWidth: 0, fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--faint)', letterSpacing: '.02em', whiteSpace: 'nowrap', overflow: 'visible' }}>
               {monthAt[wi] || ''}
             </div>
           ))}
@@ -92,7 +92,7 @@ export default function ActivityHeatmap({ dailyLogs = {} }) {
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginTop: 14, fontFamily: 'var(--mono)', fontSize: 10, color: '#A9A498' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginTop: 14, fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--faint)' }}>
         Less
         {LEGEND.map((c, i) => (
           <span key={i} style={{ width: 11, height: 11, borderRadius: 2, background: c }} />
