@@ -681,3 +681,6 @@ header { position: relative; }
 /* Placeholder hint on empty nodes */
 .rich-content p.is-editor-empty:first-child::before,
 .rich-content .is-empty::before { content: attr(data-placeholder); float: left; color: var(--faint); pointer-events: none; height: 0; }
+
+.vault-drawing { height: min(72vh, 760px); min-height: 420px; position: relative; margin-top: 16px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; line-height: normal; }
+.vault-drawing .excalidraw { --color-primary: #157a57; }

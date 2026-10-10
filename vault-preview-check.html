@@ -1,0 +1,8 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Vault sync verification</title></head><body><div id="root"></div><script type="module">
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import ObsidianNotesPage from '/src/pages/ObsidianNotesPage.jsx';
+import '/src/index.css';
+createRoot(document.getElementById('root')).render(React.createElement(BrowserRouter,null,React.createElement(ObsidianNotesPage,{userId:'local-verification',onSignOut:()=>{}})));
+</script></body></html>
