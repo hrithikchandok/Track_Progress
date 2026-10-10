@@ -17,7 +17,7 @@ export function parseVaultNote(raw, path, { repo, ref, vault }) {
   const validDate = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)
     && Number.isFinite(Date.parse(date)) && new Date(date).toISOString().slice(0, 10) === date;
   return {
-    id: `${repo}:${path}`, path,
+    id: `${repo}:${path}`, path, kind: 'markdown',
     title: typeof data.title === 'string' && data.title.trim() ? data.title : basename,
     track, status: ['draft', 'ready', 'revised'].includes(data.status) ? data.status : 'draft',
     confidence: [1, 2, 3].includes(Number(data.confidence)) ? Number(data.confidence) : null,
@@ -35,8 +35,15 @@ export class VaultError extends Error {
   }
 }
 
-export async function syncVault({ repo, folder = '', vault, token, fetcher = fetch }) {
-  async function github(path) {
+export async function publicVaultFile({ repo, ref, path, fetcher = fetch }) {
+  const response = await fetcher(`https://raw.githubusercontent.com/${repo}/${encodeURIComponent(ref)}/${path.split('/').map(encodeURIComponent).join('/')}`, { signal: AbortSignal.timeout(20000) });
+  if (response.status === 429) throw new VaultError('GitHub rate limit reached. Try again shortly.', 429, 60);
+  if (!response.ok) throw new VaultError(`Could not load public vault file (${response.status}): ${path}`);
+  return response.text();
+}
+
+export function githubClient({ repo, token, fetcher = fetch }) {
+  return async function github(path) {
     const response = await fetcher(`https://api.github.com/repos/${repo}${path}`, {
       headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
         ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -55,6 +62,10 @@ export async function syncVault({ repo, folder = '', vault, token, fetcher = fet
     }
     return response.json();
   }
+}
+
+export async function syncVault({ repo, folder = '', vault, token, fetcher = fetch }) {
+  const github = githubClient({ repo, token, fetcher });
   const repository = await github('');
   const branch = await github(`/commits/${encodeURIComponent(repository.default_branch)}`);
   const ref = branch.sha;
@@ -69,19 +80,30 @@ export async function syncVault({ repo, folder = '', vault, token, fetcher = fet
   }
   const tree = await github(`/git/trees/${treeSha}?recursive=1`);
   if (tree.truncated) throw new VaultError('GitHub truncated the vault tree. Set VAULT_FOLDER to a smaller folder.', 422);
-  const files = tree.tree.filter(e => e.type === 'blob' && /\.md$/i.test(e.path));
-  if (files.length > 500 || files.some(f => f.size > 500000) || files.reduce((n, f) => n + (f.size || 0), 0) > 2500000) {
+  const files = tree.tree.filter(e => e.type === 'blob' && /\.(md|excalidraw)$/i.test(e.path));
+  const markdownFiles = files.filter(f => /\.md$/i.test(f.path));
+  if (files.length > 500 || markdownFiles.some(f => f.size > 500000) || markdownFiles.reduce((n, f) => n + (f.size || 0), 0) > 2500000) {
     throw new VaultError('Vault exceeds sync limits (500 notes, 500 KB per note, 2.5 MB total). Set VAULT_FOLDER to a smaller folder.', 422);
   }
   const notes = [];
   // Bounded batches keep GitHub secondary limits and server memory under control.
   for (let i = 0; i < files.length; i += 5) {
     const batch = await Promise.all(files.slice(i, i + 5).map(async file => {
-      const blob = await github(`/git/blobs/${file.sha}`);
-      if (blob.encoding !== 'base64') throw new VaultError('GitHub returned an unsupported note encoding.');
       const path = [folder, file.path].filter(Boolean).join('/');
+      if (/\.excalidraw$/i.test(path)) {
+        const note = parseVaultNote('', path, { repo, ref, vault });
+        return { ...note, kind: 'excalidraw', title: path.split('/').pop().replace(/\.excalidraw$/i, ''),
+          sha: file.sha, ref, size: file.size };
+      }
+      let raw;
+      if (!token) raw = await publicVaultFile({ repo, ref, path, fetcher });
+      else {
+        const blob = await github(`/git/blobs/${file.sha}`);
+        if (blob.encoding !== 'base64') throw new VaultError('GitHub returned an unsupported note encoding.');
+        raw = Buffer.from(blob.content, 'base64').toString('utf8');
+      }
       try {
-        return parseVaultNote(Buffer.from(blob.content, 'base64').toString('utf8'), path, { repo, ref, vault });
+        return parseVaultNote(raw, path, { repo, ref, vault });
       } catch { throw new VaultError(`Invalid YAML frontmatter in ${path}. Fix this note and sync again.`, 422); }
     }));
     notes.push(...batch);

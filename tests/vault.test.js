@@ -5,6 +5,18 @@ import { vaultStats, revisionQueue } from '../src/utils/vaultProgress.js';
 import handler from '../api/sync-vault.js';
 
 const config = { repo: 'owner/repo', ref: 'abc123', vault: 'My Vault' };
+test('vault endpoints reject every mutation method without contacting GitHub', async () => {
+  const { default: drawingHandler } = await import('../api/vault-drawing.js');
+  for (const endpoint of [handler, drawingHandler]) {
+    for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
+      const headers = {};
+      const res = { setHeader(key, value) { headers[key] = value; }, status(code) { this.code = code; return this; }, json(value) { this.value = value; return this; } };
+      await endpoint({ method, headers: {} }, res);
+      assert.equal(res.code, 405);
+      assert.equal(headers.Allow, 'GET');
+    }
+  }
+});
 test('rejects executable frontmatter engines', () => {
   assert.throws(() => parseVaultNote('---javascript\n({title: "unsafe"})\n---\nBody', 'Note.md', config), /Only YAML/);
 });
@@ -39,7 +51,7 @@ test('GitHub sync recurses into configured folder and fetches Markdown blobs onl
     { tree: [{ type: 'blob', path: 'sub/Note.md', sha: 'note', size: 10 }, { type: 'blob', path: 'x.png', sha: 'image' }] },
     { encoding: 'base64', content: Buffer.from('# Note').toString('base64') } ];
   const urls = [];
-  const notes = await syncVault({ repo: 'owner/repo', folder: 'System-Design', vault: 'Vault', fetcher: async url => {
+  const notes = await syncVault({ repo: 'owner/repo', folder: 'System-Design', vault: 'Vault', token: 'test-token', fetcher: async url => {
     urls.push(url); return Response.json(replies.shift());
   } });
   assert.equal(notes.length, 1); assert.equal(notes[0].path, 'System-Design/sub/Note.md');
@@ -62,6 +74,61 @@ test('API rejects anonymous users and other accounts before contacting GitHub', 
     globalThis.fetch = async url => { assert.match(url, /\/auth\/v1\/user$/); return Response.json({ id: 'someone-else' }); };
     await handler({ method: 'GET', headers: { authorization: 'Bearer test' } }, res);
     assert.equal(res.code, 403);
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousOwner === undefined) delete process.env.VAULT_OWNER_USER_ID; else process.env.VAULT_OWNER_USER_ID = previousOwner;
+  }
+});
+
+test('public sync loads raw notes and indexes large nested drawings without downloading them', async () => {
+  const calls = [];
+  const replies = [{ default_branch: 'main' }, { sha: 'c'.repeat(40), commit: { tree: { sha: 'root' } } },
+    { tree: [{ type: 'blob', path: 'Intro.md', sha: 'note', size: 20 },
+      { type: 'blob', path: 'Excalidraw/Deep Dive/DB.excalidraw', sha: 'd'.repeat(40), size: 1175940 }] }];
+  const notes = await syncVault({ repo: 'owner/repo', vault: 'Vault', fetcher: async (url, options) => {
+    calls.push(url);
+    assert.equal(options.headers?.Authorization, undefined);
+    if (url.startsWith('https://raw.githubusercontent.com/')) return new Response('# Intro');
+    return Response.json(replies.shift());
+  } });
+  assert.equal(calls.length, 4);
+  const drawing = notes.find(n => n.kind === 'excalidraw');
+  assert.equal(drawing.title, 'DB');
+  assert.equal(drawing.ref, 'c'.repeat(40));
+  assert.equal(drawing.raw, '');
+  assert.match(drawing.obsidianUrl, /DB\.excalidraw$/);
+  assert.equal(notes.find(n => n.kind === 'markdown').content, '# Intro');
+});
+
+test('public access never attaches the private GitHub token', async () => {
+  const { vaultAccess } = await import('../server/vaultAccess.js');
+  const previousOwner = process.env.VAULT_OWNER_USER_ID;
+  const previousToken = process.env.GITHUB_TOKEN;
+  delete process.env.VAULT_OWNER_USER_ID;
+  process.env.GITHUB_TOKEN = 'must-not-leak';
+  try { assert.equal((await vaultAccess({ headers: {} })).token, undefined); }
+  finally {
+    if (previousOwner === undefined) delete process.env.VAULT_OWNER_USER_ID; else process.env.VAULT_OWNER_USER_ID = previousOwner;
+    if (previousToken === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = previousToken;
+  }
+});
+
+test('drawing API handles public scenes, rejects traversal and malformed JSON', async () => {
+  const { default: drawingHandler } = await import('../api/vault-drawing.js');
+  const previousOwner = process.env.VAULT_OWNER_USER_ID;
+  const previousFetch = globalThis.fetch;
+  delete process.env.VAULT_OWNER_USER_ID;
+  const res = { setHeader() {}, status(code) { this.code = code; return this; }, json(value) { this.value = value; return this; } };
+  const query = { sha: 'a'.repeat(40), ref: 'b'.repeat(40), path: 'Excalidraw/Deep Dive/DB.excalidraw' };
+  try {
+    globalThis.fetch = async url => { assert.match(url, /raw\.githubusercontent\.com/); return new Response(JSON.stringify({ type: 'excalidraw', elements: [], files: {} })); };
+    await drawingHandler({ method: 'GET', headers: {}, query }, res);
+    assert.equal(res.code, 200); assert.deepEqual(res.value.scene.elements, []);
+    await drawingHandler({ method: 'GET', headers: {}, query: { ...query, path: '../DB.excalidraw' } }, res);
+    assert.equal(res.code, 400);
+    globalThis.fetch = async () => new Response('{broken');
+    await drawingHandler({ method: 'GET', headers: {}, query }, res);
+    assert.equal(res.code, 422);
   } finally {
     globalThis.fetch = previousFetch;
     if (previousOwner === undefined) delete process.env.VAULT_OWNER_USER_ID; else process.env.VAULT_OWNER_USER_ID = previousOwner;

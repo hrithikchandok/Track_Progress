@@ -29,23 +29,22 @@ export function useVault(userId) {
     setSyncing(true); setError('');
     try {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) throw new Error('Sign in to sync your vault.');
       const response = await fetch('/api/sync-vault', {
-        headers: { Authorization: `Bearer ${session.access_token}` }, signal: AbortSignal.timeout(120000),
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : {}, signal: AbortSignal.timeout(120000),
       });
-      const payload = await response.json().catch(() => { throw new Error('Sync API unavailable. Run with Vercel dev or deploy to Vercel.'); });
+      const payload = await response.json().catch(() => { throw new Error('Sync API unavailable. Restart npm run dev or redeploy to Vercel.'); });
       if (!response.ok) {
         const delay = response.headers.get('Retry-After');
         throw new Error(`${payload.error || 'Sync failed.'}${delay ? ` Retry in ${delay} seconds.` : ''}`);
       }
       if (!Array.isArray(payload)) throw new Error('Unexpected vault response.');
-      if (mounted.current) persist({ ...read(key), notes: payload, syncedAt: response.headers.get('X-Vault-Synced-At') || new Date().toISOString() });
+      if (mounted.current) persist({ ...read(key), schemaVersion: 2, notes: payload, syncedAt: response.headers.get('X-Vault-Synced-At') || new Date().toISOString() });
     } catch (e) { if (mounted.current) setError(e.message); }
     finally { busy.current = false; if (mounted.current) setSyncing(false); }
   }, [key, persist]);
   useEffect(() => {
     // Refresh on visit if stale, then every 15 minutes while this view is open.
-    if (!data.syncedAt || Date.now() - Date.parse(data.syncedAt) > 15 * 60000) sync();
+    if (data.schemaVersion !== 2 || !data.syncedAt || Date.now() - Date.parse(data.syncedAt) > 15 * 60000) sync();
     const interval = setInterval(() => { if (document.visibilityState === 'visible') sync(); }, 15 * 60000);
     return () => clearInterval(interval);
   }, [sync]);

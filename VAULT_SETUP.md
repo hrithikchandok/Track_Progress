@@ -6,11 +6,11 @@ This repository is React/Vite deployed to Vercel, not Next.js. The server endpoi
 
 1. Install dependencies with `npm install`.
 2. Copy [.env.example](./.env.example) to `.env.local` for local use, or add those values in Vercel Project Settings → Environment Variables.
-3. Set `VAULT_OWNER_USER_ID` to your account's UUID from Supabase → Authentication → Users. Only that authenticated user can fetch the vault. Private notes are never added to public profiles.
-4. For a private repository, set `GITHUB_TOKEN` to a fine-grained GitHub token with **Contents: Read-only** for `hrithikchandok/obsidian_vault`. Public repositories work without a token, subject to GitHub's lower anonymous rate limit. Never use a `VITE_` prefix for the token.
+3. Your public `hrithikchandok/obsidian_vault` repository works without a token or owner ID. The API uses anonymous access only in public mode, even if a token is configured. GitHub REST discovers the current commit and file tree; public file bodies are fetched from GitHub's raw host to conserve the REST rate limit.
+4. For a private repository, set BOTH `VAULT_OWNER_USER_ID` to your UUID from Supabase → Authentication → Users and `GITHUB_TOKEN` to a fine-grained token with **Contents: Read-only**. Only the specified user can fetch the vault in this mode. Never use a `VITE_` prefix for the token. Private notes are never added to public profiles.
 5. Set `OBSIDIAN_VAULT_NAME` to the exact local vault name displayed in Obsidian. Default: `obsidian_vault`.
 6. `VAULT_FOLDER` defaults to blank (all Markdown files). Set it to the exact, case-sensitive folder path, for example `System-Design`, to limit syncing. Paths remain relative to the repository root; the repository root must correspond to the local vault root.
-7. Run `npx vercel dev` to serve both the API and frontend locally, or deploy to Vercel and redeploy after changing environment variables. `npm run dev` alone only serves the frontend.
+7. Run `npm run dev` to serve both vault APIs and the frontend locally, or deploy to Vercel. Vite loads server settings from `.env.local`; restart after changing settings. Production uses the Vercel API routes.
 8. Sign in, open **Obsidian Notes** to the right of **Articles**, and click **Sync Vault**. Notes refresh on opening a stale view and every 15 minutes while the tracker/notes view is visible. Commit and push local Obsidian changes to GitHub first; this is a one-way GitHub sync, not filesystem access or a GitHub webhook.
 
 ## Note metadata
@@ -34,7 +34,9 @@ The API returns a normalized JSON array with `title`, `track`, `status`, `confid
 
 ## Rendering and persistence
 
-The reader renders headings, tables, code fences, lists, and common wiki links. **Markdown source** preserves the entire file verbatim, including YAML. Raw HTML is not executed. Obsidian plugin features, canvases, embedded notes, images, and Mermaid diagrams are not reproduced; use the Obsidian/GitHub links for those. The browser may ask before opening the Obsidian URI.
+The reader renders headings, tables, code fences, lists, and common wiki links. **Markdown source** preserves the entire file verbatim, including YAML. Raw HTML is not executed. Obsidian plugin features, embedded notes, Markdown attachments, and Mermaid diagrams are not reproduced; use the Obsidian/GitHub links for those. The browser may ask before opening the Obsidian URI.
+
+The **Excalidraw** filter includes `.excalidraw` JSON files from all nested folders. They open in a read-only Excalidraw canvas with zoom, pan, and embedded images. Empty scenes show an empty-drawing message. Drawing JSON is fetched on demand from the synced commit through `/api/vault-drawing`, with a 2.5 MB per-drawing limit. Only drawing metadata is persisted; up to six opened scenes are cached in memory. The original scene can be inspected using **Drawing source**. Changes must be committed and pushed from Obsidian before syncing. Drawing metadata defaults to unclassified/draft and does not automatically claim completed HLD topics. Compressed `.excalidraw.md` plugin files are not supported by the drawing viewer.
 
 Snapshots, target lists, and sync timestamps are stored in localStorage scoped to the signed-in user. A successful sync replaces the snapshot, including removing deleted notes. Errors retain the last successful snapshot. Browser storage limits produce an explicit error. Vault snapshots are separate from tracker backup/reset and are local to this browser; clearing site data removes them. On shared computers, clear site data after use because signing out does not erase local snapshots.
 
