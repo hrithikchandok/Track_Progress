@@ -20,10 +20,13 @@ import LiveUsers from '../components/LiveUsers';
 import ActivityHeatmap from '../components/ActivityHeatmap';
 import InterviewsSection from '../components/InterviewsSection';
 import { usePresence } from '../hooks/usePresence';
+import { useVault } from '../hooks/useVault';
+import VaultRoadmap from '../components/VaultRoadmap';
 
 const pad = n => String(n).padStart(2, '0');
 
 export default function DashboardPage({ userId, onSignOut }) {
+  const vault = useVault(userId);
   const { sections, progress, username, initialized, saveText, dailyLogs, completionLogs, headerMeta, interviews, applicationsCount, todayIds, toggle, update, setupUser, saveUsername, resetAll, exportProgress, importBackup, updateHeaderMeta, saveInterviews, saveApplicationsCount, toggleTodayItem, reviseSection, saveNote } = useUserData(userId);
   const liveCount = usePresence(userId);
   const clock = useDayClock();
@@ -175,7 +178,7 @@ export default function DashboardPage({ userId, onSignOut }) {
       <LiveUsers count={liveCount} />
       <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} completionLogs={completionLogs} />
       <ActivityHeatmap dailyLogs={dailyLogs} />
-      <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} onFilterChange={handleFilterChange} />
+      <TrackBars sections={sections} progress={progress} activeFilter={activeFilter} onFilterChange={handleFilterChange} vault={vault} />
       <TodayPanel
         items={todayItems}
         progress={progress}
@@ -206,10 +209,12 @@ export default function DashboardPage({ userId, onSignOut }) {
         onAddItem={id => setAddItemTo(id)}
         onDeleteItem={handleDeleteItem}
       />
+      <VaultRoadmap vault={vault} activeFilter={activeFilter} />
       {isEditMode && (
         <button className="btn add-section-btn" onClick={() => setShowAddSection(true)}>+ Add section</button>
       )}
       <Footer
+        vault={vault}
         saveText={saveText}
         isEditMode={isEditMode}
         onToggleEdit={() => setIsEditMode(v => !v)}
