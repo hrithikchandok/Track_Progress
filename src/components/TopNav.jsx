@@ -5,10 +5,12 @@ import ThemeToggle from './ThemeToggle';
 // { key, label, to }; `active` matches one key. `right` renders extra controls.
 // The light/dark toggle is always present at the end of the right cluster.
 export default function TopNav({ links = [], active, right }) {
+  const navLinks = links.flatMap(link => link.to === '/articles'
+    ? [link, { key: 'obsidian', label: '◇ Obsidian Notes', to: '/obsidian' }] : [link]);
   return (
     <nav className="topnav">
       <div className="topnav-links">
-        {links.map(l => (
+        {navLinks.map(l => (
           <Link key={l.key} to={l.to} className={`topnav-link${active === l.key ? ' active' : ''}`}>
             {l.label}
           </Link>

@@ -7,6 +7,7 @@ import PublicPage from './pages/PublicPage';
 
 // Article pages pull in TipTap + highlight.js — load them only on demand.
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
+const ObsidianNotesPage = lazy(() => import('./pages/ObsidianNotesPage'));
 const ArticleEditorPage = lazy(() => import('./pages/ArticleEditorPage'));
 const PublicArticlesPage = lazy(() => import('./pages/PublicArticlesPage'));
 const ArticleReadPage = lazy(() => import('./pages/ArticleReadPage'));
@@ -16,7 +17,7 @@ const PageFallback = () => <div className="wrap" style={{ paddingTop: 80 }}><p c
 function AuthGate({ session, loading, signIn, signUp, signOut }) {
   if (loading) return <div className="wrap" style={{ paddingTop: 80 }}><p className="sub">Loading…</p></div>;
   if (!session) return <AuthPage onSignIn={signIn} onSignUp={signUp} />;
-  return <DashboardPage userId={session.user.id} onSignOut={signOut} />;
+  return <DashboardPage key={session.user.id} userId={session.user.id} onSignOut={signOut} />;
 }
 
 export default function App() {
@@ -37,6 +38,9 @@ export default function App() {
               : session ? <ArticlesPage userId={session.user.id} onSignOut={signOut} />
               : <Navigate to="/login" replace />
           } />
+          <Route path="/obsidian" element={loading ? <PageFallback /> : session
+            ? <ObsidianNotesPage key={session.user.id} userId={session.user.id} onSignOut={signOut} />
+            : <Navigate to="/login" replace />} />
           <Route path="/articles/:id" element={
             loading ? <PageFallback />
               : session ? <ArticleEditorPage userId={session.user.id} />

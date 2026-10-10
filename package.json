@@ -8,6 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "gray-matter": "^4.0.3",
+    "react-markdown": "^9.0.3",
+    "remark-gfm": "^4.0.1",
     "@supabase/supabase-js": "^2.49.4",
     "@tiptap/extension-code-block-lowlight": "^2.27.2",
     "@tiptap/extension-image": "^2.27.2",

@@ -1,8 +1,9 @@
 import { secProgress } from '../utils/progress';
+import { vaultStats } from '../utils/vaultProgress';
 
-export default function TrackBars({ sections, progress, activeFilter = 'all', onFilterChange }) {
+export default function TrackBars({ sections, progress, activeFilter = 'all', onFilterChange, vault }) {
   const main = sections.filter(s => !s.sup);
-  if (!main.length) return null;
+  if (!main.length && !vault) return null;
 
   // Filter chips — one per distinct track, plus "All".
   const seen = new Set();
@@ -13,6 +14,10 @@ export default function TrackBars({ sections, progress, activeFilter = 'all', on
       seen.add(track);
       chips.push({ key: track, label: track.toUpperCase() });
     }
+  }
+
+  if (vault) for (const track of ['hld', 'lld']) {
+    if (!seen.has(track)) chips.push({ key: track, label: track.toUpperCase() });
   }
 
   return (
@@ -33,6 +38,14 @@ export default function TrackBars({ sections, progress, activeFilter = 'all', on
         );
       })}
 
+      {vault && ['HLD', 'LLD'].map(track => {
+        const stats = vaultStats(vault.notes, track, vault.targets[track]);
+        return <div key={`vault-${track}`}>
+          <div className="trk-top"><span className="trk-name">{track} · Vault</span><span className="trk-pct">{stats.pct === null ? 'Set targets' : `${stats.pct}%`}</span></div>
+          <div className="trk-bar"><i style={{ width: `${stats.pct || 0}%` }} /></div>
+          <p className="sub">{stats.total ? `${stats.created}/${stats.total} targets created` : `${stats.items.length} notes · add targets in Obsidian Notes`} · Confidence {stats.confidence || '—'}/3</p>
+        </div>;
+      })}
       {onFilterChange && chips.length > 1 && (
         <div className="trk-filter">
           {chips.map(f => (

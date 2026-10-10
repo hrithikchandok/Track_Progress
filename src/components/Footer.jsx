@@ -1,6 +1,7 @@
 import { useRef } from 'react';
+import VaultControls from './VaultControls';
 
-export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, onExport, onImport, onImportFromLink, onReset, onSignOut }) {
+export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, onExport, onImport, onImportFromLink, onReset, onSignOut, vault }) {
   const fileRef = useRef(null);
 
   function handleImportClick() { fileRef.current?.click(); }
@@ -24,6 +25,7 @@ export default function Footer({ saveText, isEditMode, onToggleEdit, onShare, on
           <button className="btn" onClick={onShare}>Share</button>
           <button className="btn" onClick={onExport}>Export</button>
           <button className="btn" onClick={handleImportClick}>Import</button>
+          {vault && <VaultControls vault={vault} />}
           <button className="btn" onClick={onImportFromLink}>Import from link</button>
           <button className="btn danger" onClick={onReset}>Reset all</button>
           <button className="btn" onClick={onSignOut}>Sign out</button>
