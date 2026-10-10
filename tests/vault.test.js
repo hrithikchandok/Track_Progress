@@ -5,6 +5,18 @@ import { vaultStats, revisionQueue } from '../src/utils/vaultProgress.js';
 import handler from '../api/sync-vault.js';
 
 const config = { repo: 'owner/repo', ref: 'abc123', vault: 'My Vault' };
+test('vault endpoints reject every mutation method without contacting GitHub', async () => {
+  const { default: drawingHandler } = await import('../api/vault-drawing.js');
+  for (const endpoint of [handler, drawingHandler]) {
+    for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
+      const headers = {};
+      const res = { setHeader(key, value) { headers[key] = value; }, status(code) { this.code = code; return this; }, json(value) { this.value = value; return this; } };
+      await endpoint({ method, headers: {} }, res);
+      assert.equal(res.code, 405);
+      assert.equal(headers.Allow, 'GET');
+    }
+  }
+});
 test('rejects executable frontmatter engines', () => {
   assert.throws(() => parseVaultNote('---javascript\n({title: "unsafe"})\n---\nBody', 'Note.md', config), /Only YAML/);
 });
