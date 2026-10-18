@@ -10,7 +10,7 @@ export default function VaultRoadmap({ vault, activeFilter = 'all' }) {
         <summary>{track} · Obsidian notes <span className="sub">{stats.items.length} notes · {stats.completed} ready / revised · Confidence {stats.confidence || '—'}/3</span></summary>
         {!stats.items.length && <p className="sub">Sync notes with track: {track} in their frontmatter to see them here.</p>}
         {stats.items.map(n => <div className="vault-note-row" key={n.id}>
-          <Link to={`/obsidian?note=${encodeURIComponent(n.path)}`}>{n.title}</Link>
+          <Link to={`/obsidian?note=${encodeURIComponent(n.path)}&kind=${n.kind || 'markdown'}`}>{n.title}</Link>
           <span className="chip">{n.status} · {n.confidence || '—'}/3</span>
           <a href={n.obsidianUrl}>Open in Obsidian ↗</a>
           <a href={n.githubUrl} target="_blank" rel="noreferrer">GitHub ↗</a>
