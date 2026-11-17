@@ -120,7 +120,7 @@ function EditableBlock({ value, onSave, className, placeholder }) {
   );
 }
 
-export default function Header({ meta = {}, onSaveMeta, focusMode, onToggleFocus, focusAvailable }) {
+export default function Header({ meta = {}, onSaveMeta }) {
   const role = meta.role || 'Java · Backend';
   const kicker = meta.kicker || 'Backend Switch · 2026';
   const company = meta.company || '';
@@ -133,18 +133,6 @@ export default function Header({ meta = {}, onSaveMeta, focusMode, onToggleFocus
 
   return (
     <header>
-      {onToggleFocus && (
-        <button
-          className={`focus-toggle${focusMode ? ' on' : ''}`}
-          onClick={onToggleFocus}
-          title={focusAvailable
-            ? (focusMode ? 'Focus mode on — tap to relax' : 'Crank the pressure: go red until Today is done')
-            : 'Star tasks into Today to use Focus mode'}
-        >
-          <Icon name="zap" size={14} />
-          {focusMode ? 'Focus on' : 'Focus'}
-        </button>
-      )}
       <EditableText
         value={kicker}
         onSave={v => save({ kicker: v })}

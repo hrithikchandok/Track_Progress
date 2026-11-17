@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUserData } from '../hooks/useUserData';
 import { useDayClock } from '../hooks/useDayClock';
-import { itemDone } from '../utils/progress';
 import { fireConfetti } from '../utils/confetti';
 import { genId } from '../utils/id';
 import Header from '../components/Header';
@@ -37,7 +36,6 @@ export default function DashboardPage({ userId, onSignOut }) {
   const [showAddSection, setShowAddSection] = useState(false);
   const [showLinkImport, setShowLinkImport] = useState(false);
   const [addItemTo, setAddItemTo] = useState(null);
-  const [focusMode, setFocusMode] = useState(() => localStorage.getItem('focusMode') === '1');
   const [showMini, setShowMini] = useState(false);
 
   // Surface the day-clock as a compact pill in the sticky nav once the big
@@ -53,14 +51,6 @@ export default function DashboardPage({ userId, onSignOut }) {
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  function handleToggleFocus() {
-    setFocusMode(prev => {
-      const next = !prev;
-      localStorage.setItem('focusMode', next ? '1' : '0');
-      return next;
-    });
-  }
 
   // Wraps the data-layer toggle: when a task crosses into "done", fire the
   // confetti celebration.
@@ -145,8 +135,6 @@ export default function DashboardPage({ userId, onSignOut }) {
   // Resolve the Today list (ids → item objects), preserving the order they were starred.
   const itemsById = new Map(sections.flatMap(s => (s.items || []).map(i => [i.id, { ...i, track: s.track }])));
   const todayItems = todayIds.map(id => itemsById.get(id)).filter(Boolean);
-  const pendingToday = todayItems.filter(i => !itemDone(i, progress));
-  const hasPending = pendingToday.length > 0;
 
   return (
     <div className="wrap">
@@ -169,9 +157,6 @@ export default function DashboardPage({ userId, onSignOut }) {
       <Header
         meta={headerMeta}
         onSaveMeta={updateHeaderMeta}
-        focusMode={focusMode}
-        focusAvailable={hasPending}
-        onToggleFocus={handleToggleFocus}
       />
       <LiveUsers count={liveCount} />
       <Dashboard sections={sections} progress={progress} dailyLogs={dailyLogs} completionLogs={completionLogs} />

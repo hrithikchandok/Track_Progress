@@ -25,7 +25,7 @@ export default function TodayPanel({ items, progress, clock, onToggle, onToggleT
             {total > 0 && <span className="today-count">{done}/{total} done</span>}
           </div>
           <p className="today-help">
-            Star any task below to commit to it today, then hit <b>Focus</b> to lock in. The clock is watching.
+            Star any task below to commit to it today. The clock is watching.
           </p>
         </div>
 
