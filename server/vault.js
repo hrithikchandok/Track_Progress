@@ -103,7 +103,7 @@ export async function syncVault({ repo, folder = '', vault, token, fetcher = fet
         raw = Buffer.from(blob.content, 'base64').toString('utf8');
       }
       try {
-        return parseVaultNote(raw, path, { repo, ref, vault });
+        return { ...parseVaultNote(raw, path, { repo, ref, vault }), sha: file.sha };
       } catch { throw new VaultError(`Invalid YAML frontmatter in ${path}. Fix this note and sync again.`, 422); }
     }));
     notes.push(...batch);

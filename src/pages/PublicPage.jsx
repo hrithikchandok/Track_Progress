@@ -52,8 +52,8 @@ export default function PublicPage() {
       <TopNav
         active="tracker"
         links={[
-          { key: 'tracker', label: '◷ Tracker', to: `/u/${username}` },
-          { key: 'articles', label: '✎ Articles', to: `/u/${username}/articles` },
+          { key: 'tracker', label: 'Tracker', to: `/u/${username}` },
+          { key: 'articles', label: 'Articles', to: `/u/${username}/articles` },
         ]}
       />
       <div className="banner view" style={{ marginBottom: 22 }}>

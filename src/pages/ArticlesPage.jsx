@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { sb } from '../lib/supabase';
 import { useArticles } from '../hooks/useArticles';
 import TopNav from '../components/TopNav';
+import Icon from '../components/Icon';
 
 function fmtDate(iso) {
   if (!iso) return '';
@@ -35,33 +36,26 @@ export default function ArticlesPage({ userId, onSignOut }) {
     navigate(`/articles/${id}`);
   }
 
-  const navRight = (
-    <>
-      {username && <a className="topnav-ext" href={`/u/${username}/articles`} target="_blank" rel="noopener noreferrer">↗ Public view</a>}
-      {onSignOut && <button className="topnav-signout" onClick={onSignOut}>Sign out</button>}
-    </>
-  );
+  const navRight = username
+    ? <a className="topnav-ext" href={`/u/${username}/articles`} target="_blank" rel="noopener noreferrer">Public view</a>
+    : null;
 
   return (
     <div className="wrap">
-      <TopNav
-        active="articles"
-        links={[{ key: 'tracker', label: '◷ Tracker', to: '/' }, { key: 'articles', label: '✎ Articles', to: '/articles' }]}
-        right={navRight}
-      />
+      <TopNav active="articles" onSignOut={onSignOut} right={navRight} />
 
       <div className="articles-head">
         <div>
-          <div className="kicker">Writing</div>
-          <h1>Articles</h1>
-          <p className="sub" style={{ marginTop: 6 }}>Draft, publish, and share long-form notes. Published pieces appear on your public profile.</p>
+          <div className="eyebrow">Writing</div>
+          <h1 className="page-title">Articles</h1>
+          <p className="sub">Draft, publish, and share long-form notes. Published pieces appear on your public profile.</p>
         </div>
         <button className="btn btn-primary new-article-btn" onClick={openNew} disabled={busy}>
-          {busy ? 'Creating…' : '+ New article'}
+          <Icon name="plus" size={15} /> {busy ? 'Creating…' : 'New article'}
         </button>
       </div>
 
-      {err && <div className="banner edit" style={{ borderColor: 'rgba(248,113,113,.4)', color: 'var(--core)', background: 'rgba(248,113,113,.08)' }}>{err}</div>}
+      {err && <div className="banner error" role="alert">{err}</div>}
 
       {loading ? (
         <p className="sub">Loading…</p>
@@ -71,20 +65,21 @@ export default function ArticlesPage({ userId, onSignOut }) {
           <button className="btn btn-primary" onClick={openNew} disabled={busy}>{busy ? 'Creating…' : 'Write your first one'}</button>
         </div>
       ) : (
-        <div className="articles-list">
+        <ul className="articles-list">
           {articles.map(a => (
-            <button key={a.id} className="article-row" onClick={() => navigate(`/articles/${a.id}`)}>
-              <div className="article-row-main">
+            <li key={a.id}>
+              <button className="article-row" onClick={() => navigate(`/articles/${a.id}`)}>
                 <span className="article-row-title">{a.title || 'Untitled'}</span>
+                <span className="article-row-meta">
+                  <span className="mono">{fmtDate(a.updated_at)}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className={`status-pill${a.published ? ' pub' : ''}`}>{a.published ? 'Published' : 'Draft'}</span>
+                </span>
                 {a.subtitle && <span className="article-row-sub">{a.subtitle}</span>}
-              </div>
-              <div className="article-row-meta">
-                <span className={`article-badge${a.published ? ' pub' : ''}`}>{a.published ? 'Published' : 'Draft'}</span>
-                <span className="article-row-date">{fmtDate(a.updated_at)}</span>
-              </div>
-            </button>
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

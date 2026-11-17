@@ -1,5 +1,6 @@
 import { secProgress } from '../utils/progress';
 import TaskItem from './TaskItem';
+import Icon from './Icon';
 
 // Editorial tag-chip palette keyed by track (text / soft-fill). Falls back to
 // the section's own color for any track not in the design's token table.
@@ -92,7 +93,7 @@ export default function Section({ section, progress, isOpen, activeFilter, canEd
             <button className="edit-btn danger" onClick={() => onDeleteSection(section.id)} title="Delete section">delete</button>
           </div>
         ) : (
-          <span className="sec-chev">▸</span>
+          <Icon name="chevronRight" size={15} className="sec-chev" />
         )}
       </div>
       {isOpen && (

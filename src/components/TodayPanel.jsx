@@ -1,4 +1,5 @@
 import { itemDone } from '../utils/progress';
+import Icon from './Icon';
 
 const pad = n => String(n).padStart(2, '0');
 
@@ -24,7 +25,7 @@ export default function TodayPanel({ items, progress, clock, onToggle, onToggleT
             {total > 0 && <span className="today-count">{done}/{total} done</span>}
           </div>
           <p className="today-help">
-            Star any task below to commit to it today, then hit <b>⚡ Focus</b> to lock in. The clock is watching.
+            Star any task below to commit to it today, then hit <b>Focus</b> to lock in. The clock is watching.
           </p>
         </div>
 
@@ -46,18 +47,18 @@ export default function TodayPanel({ items, progress, clock, onToggle, onToggleT
                   onClick={() => onToggle(item.id, completionValue(item, d))}
                   aria-label={d ? 'Mark not done' : 'Mark done'}
                 >
-                  {d ? '✓' : ''}
+                  {d ? <Icon name="check" size={13} strokeWidth={2.5} /> : null}
                 </button>
                 <span className="today-text">{item.text}</span>
                 {tag && <span className="today-tag">{tag}</span>}
-                <button className="today-unstar" onClick={() => onToggleToday(item.id)} title="Remove from Today">×</button>
+                <button className="today-unstar" onClick={() => onToggleToday(item.id)} title="Remove from Today" aria-label="Remove from Today"><Icon name="x" size={15} /></button>
               </li>
             );
           })}
         </ul>
       ) : (
         <div className="today-empty-box">
-          <span className="te-star">☆</span> No tasks for today yet — star a topic in the Roadmap below to add it here.
+          <Icon name="star" size={15} className="te-star" /> No tasks for today yet — star a topic in the Roadmap below to add it here.
         </div>
       )}
 

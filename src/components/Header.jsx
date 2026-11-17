@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from './Icon';
 
 function EditableText({ value, onSave, className, inputClassName, placeholder }) {
   const [editing, setEditing] = useState(false);
@@ -33,7 +34,7 @@ function EditableText({ value, onSave, className, inputClassName, placeholder })
 
   return (
     <span className={`${className} editable-hdr`} onClick={startEdit} title="Click to edit">
-      {value}<span className="edit-pencil">✎</span>
+      {value}<Icon name="pencil" size={11} className="edit-pencil" />
     </span>
   );
 }
@@ -74,7 +75,7 @@ function EditableChips({ value, onSave, placeholder }) {
   return (
     <div className="company-chips editable-hdr" onClick={startEdit} title="Click to edit">
       {chips.map((c, i) => <span key={i} className="company-chip">{c}</span>)}
-      <span className="edit-pencil">✎</span>
+      <Icon name="pencil" size={11} className="edit-pencil" />
     </div>
   );
 }
@@ -114,7 +115,7 @@ function EditableBlock({ value, onSave, className, placeholder }) {
 
   return (
     <p className={`${className} editable-hdr`} onClick={startEdit} title="Click to edit" style={{ whiteSpace: 'pre-wrap' }}>
-      {value}<span className="edit-pencil" style={{ fontSize: 10 }}>✎</span>
+      {value}<Icon name="pencil" size={11} className="edit-pencil" />
     </p>
   );
 }
@@ -140,18 +141,18 @@ export default function Header({ meta = {}, onSaveMeta, focusMode, onToggleFocus
             ? (focusMode ? 'Focus mode on — tap to relax' : 'Crank the pressure: go red until Today is done')
             : 'Star tasks into Today to use Focus mode'}
         >
-          <span className="ft-bolt">⚡</span>
-          {focusMode ? 'Focus · ON' : 'Focus'}
+          <Icon name="zap" size={14} />
+          {focusMode ? 'Focus on' : 'Focus'}
         </button>
       )}
       <EditableText
         value={kicker}
         onSave={v => save({ kicker: v })}
-        className="kicker"
+        className="eyebrow"
         inputClassName="header-edit-input header-edit-kicker"
         placeholder="e.g. Backend Switch · 2026"
       />
-      <h1>
+      <h1 className="page-title">
         Prep Console{' '}
         <span className="slash">
           //{' '}

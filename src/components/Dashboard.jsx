@@ -1,4 +1,5 @@
 import { overallStats, countdown, calcStreak, calcVelocity, requiredPace, TARGET_DATE } from '../utils/progress';
+import Icon from './Icon';
 
 const fmtDate = (d) => d.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -51,7 +52,7 @@ export default function Dashboard({ sections, progress, dailyLogs = {}, completi
         )}
         {trackText && (
           <div className={`pace-eta track ${trackAhead ? 'ahead' : 'behind'}`}>
-            {trackAhead ? '✓' : '⚠'} {trackText}
+            <Icon name={trackAhead ? 'check' : 'alert'} size={12} strokeWidth={2.25} /> {trackText}
           </div>
         )}
         {aimText && (

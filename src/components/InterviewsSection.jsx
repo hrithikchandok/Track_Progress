@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { genId } from '../utils/id';
 import InterviewModal from './InterviewModal';
+import Icon from './Icon';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -112,9 +113,9 @@ function MiniCalendar({ interviews, onDayClick, selectedDate }) {
   return (
     <div className="iv-calendar">
       <div className="iv-cal-header">
-        <button className="iv-cal-nav" onClick={() => setViewDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))}>‹</button>
+        <button className="iv-cal-nav" onClick={() => setViewDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))} aria-label="Previous month"><Icon name="chevronLeft" size={15} /></button>
         <span className="iv-cal-month">{monthLabel}</span>
-        <button className="iv-cal-nav" onClick={() => setViewDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))}>›</button>
+        <button className="iv-cal-nav" onClick={() => setViewDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))} aria-label="Next month"><Icon name="chevronRight" size={15} /></button>
       </div>
       <div className="iv-cal-grid">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <div key={d} className="iv-cal-dow">{d}</div>)}
@@ -400,7 +401,7 @@ export default function InterviewsSection({ interviews, applicationsCount, onSav
             </div>
           )}
         </div>
-        <span className="iv-chev" onClick={() => setIsOpen(v => !v)} style={{ cursor: 'pointer' }}>{isOpen ? '▾' : '▸'}</span>
+        <span className="iv-chev" onClick={() => setIsOpen(v => !v)} style={{ cursor: 'pointer' }}><Icon name={isOpen ? 'chevronDown' : 'chevronRight'} size={15} /></span>
       </div>
 
       {/* ── Stat cards (4-up) ── */}

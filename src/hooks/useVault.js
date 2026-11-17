@@ -38,13 +38,13 @@ export function useVault(userId) {
         throw new Error(`${payload.error || 'Sync failed.'}${delay ? ` Retry in ${delay} seconds.` : ''}`);
       }
       if (!Array.isArray(payload)) throw new Error('Unexpected vault response.');
-      if (mounted.current) persist({ ...read(key), schemaVersion: 2, notes: payload, syncedAt: response.headers.get('X-Vault-Synced-At') || new Date().toISOString() });
+      if (mounted.current) persist({ ...read(key), schemaVersion: 3, notes: payload, syncedAt: response.headers.get('X-Vault-Synced-At') || new Date().toISOString() });
     } catch (e) { if (mounted.current) setError(e.message); }
     finally { busy.current = false; if (mounted.current) setSyncing(false); }
   }, [key, persist]);
   useEffect(() => {
     // Refresh on visit if stale, then every 15 minutes while this view is open.
-    if (data.schemaVersion !== 2 || !data.syncedAt || Date.now() - Date.parse(data.syncedAt) > 15 * 60000) sync();
+    if (data.schemaVersion !== 3 || !data.syncedAt || Date.now() - Date.parse(data.syncedAt) > 15 * 60000) sync();
     const interval = setInterval(() => { if (document.visibilityState === 'visible') sync(); }, 15 * 60000);
     return () => clearInterval(interval);
   }, [sync]);
@@ -55,5 +55,21 @@ export function useVault(userId) {
       setError('');
     } catch (e) { setError(e.message); }
   }
-  return { ...data, syncing, error, sync, saveTargets };
+  // Commit one edited file to GitHub (owner only, see api/vault-save.js) and
+  // swap the refreshed note into the local snapshot.
+  const saveFile = useCallback(async (note, content) => {
+    const { data: { session } } = await sb.auth.getSession();
+    const response = await fetch('/api/vault-save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+      body: JSON.stringify({ path: note.path, sha: note.sha, content }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || `Save failed (${response.status}).`);
+    const saved = payload.note;
+    const current = read(key);
+    if (mounted.current) persist({ ...current, notes: current.notes.map(n => (n.id === saved.id ? saved : n)) });
+    return saved;
+  }, [key, persist]);
+  return { ...data, syncing, error, sync, saveTargets, saveFile };
 }

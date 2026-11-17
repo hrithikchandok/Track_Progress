@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import syncVault from './api/sync-vault.js'
 import vaultDrawing from './api/vault-drawing.js'
+import vaultSave from './api/vault-save.js'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -13,7 +14,7 @@ export default defineConfig(({ mode }) => {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url, 'http://localhost')
-        const handler = { '/api/sync-vault': syncVault, '/api/vault-drawing': vaultDrawing }[url.pathname]
+        const handler = { '/api/sync-vault': syncVault, '/api/vault-drawing': vaultDrawing, '/api/vault-save': vaultSave }[url.pathname]
         if (!handler) return next()
         req.query = Object.fromEntries(url.searchParams)
         res.status = code => { res.statusCode = code; return res }

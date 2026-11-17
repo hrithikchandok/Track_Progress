@@ -29,8 +29,8 @@ export default function PublicArticlesPage() {
     <TopNav
       active="articles"
       links={[
-        { key: 'tracker', label: '◷ Tracker', to: `/u/${username}` },
-        { key: 'articles', label: '✎ Articles', to: `/u/${username}/articles` },
+        { key: 'tracker', label: 'Tracker', to: `/u/${username}` },
+        { key: 'articles', label: 'Articles', to: `/u/${username}/articles` },
       ]}
     />
   );
@@ -46,17 +46,17 @@ export default function PublicArticlesPage() {
       {list.length === 0 ? (
         <p className="sub" style={{ marginTop: 16 }}>No published articles yet.</p>
       ) : (
-        <div className="articles-list" style={{ marginTop: 24 }}>
+        <ul className="articles-list" style={{ marginTop: 24 }}>
           {list.map(a => (
-            <Link key={a.id} className="article-row" to={`/u/${username}/article/${a.id}`}>
-              <div className="article-row-main">
+            <li key={a.id}>
+              <Link className="article-row" to={`/u/${username}/article/${a.id}`}>
                 <span className="article-row-title">{a.title || 'Untitled'}</span>
+                <span className="article-row-meta"><span className="mono">{fmtDate(a.published_at)}</span></span>
                 {a.subtitle && <span className="article-row-sub">{a.subtitle}</span>}
-              </div>
-              <span className="article-row-date">{fmtDate(a.published_at)}</span>
-            </Link>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

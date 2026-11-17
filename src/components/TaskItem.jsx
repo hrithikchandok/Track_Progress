@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from './Icon';
 
 export default function TaskItem({ item, value, canEdit, isEditMode, isToday, note = '', onToggle, onToggleToday, onSaveNote, onDelete }) {
   const type = item.type || 'boolean';
@@ -25,14 +26,16 @@ export default function TaskItem({ item, value, canEdit, isEditMode, isToday, no
           className={`star-btn${isToday ? ' on' : ''}`}
           onClick={() => onToggleToday(item.id)}
           title={isToday ? 'Remove from Today' : 'Add to Today'}
-        >{isToday ? '★' : '☆'}</button>
+         aria-label={isToday ? 'Remove from Today' : 'Add to Today'}
+        ><Icon name="star" size={15} fill={isToday ? 'currentColor' : 'none'} /></button>
       )}
       {canEdit && onSaveNote && (
         <button
           className={`note-btn${note ? ' has-note' : ''}${noteOpen ? ' open' : ''}`}
           onClick={toggleNote}
           title={note ? 'Edit note' : 'Add note'}
-        >✎</button>
+         aria-label={note ? 'Edit note' : 'Add note'}
+        ><Icon name="pencil" size={14} /></button>
       )}
     </>
   );
@@ -65,7 +68,7 @@ export default function TaskItem({ item, value, canEdit, isEditMode, isToday, no
           <button className="cnt-btn" onClick={() => canEdit && onToggle(item.id, Math.min(target, current + 1))} disabled={!canEdit || current >= target}>+</button>
         </div>
         {extras}
-        {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
+        {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item" aria-label="Remove item"><Icon name="x" size={14} /></button>}
         {notePanel}
       </div>
     );
@@ -74,14 +77,14 @@ export default function TaskItem({ item, value, canEdit, isEditMode, isToday, no
   if (type === 'link') {
     return (
       <div className="task task-link">
-        <span className="link-icon">↗</span>
+        <Icon name="external" size={14} className="link-icon" />
         {item.url ? (
           <a href={item.url} target="_blank" rel="noopener noreferrer" className="task-text task-url">{item.text}</a>
         ) : (
           <span className="task-text">{item.text}</span>
         )}
         {item.meta && <span className="task-meta">{item.meta}</span>}
-        {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
+        {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item" aria-label="Remove item"><Icon name="x" size={14} /></button>}
       </div>
     );
   }
@@ -101,7 +104,7 @@ export default function TaskItem({ item, value, canEdit, isEditMode, isToday, no
       </span>
       {item.meta && <span className="task-meta">{item.meta}</span>}
       {extras}
-      {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item">×</button>}
+      {isEditMode && <button className="delete-item-btn" onClick={onDelete} title="Remove item" aria-label="Remove item"><Icon name="x" size={14} /></button>}
       {notePanel}
     </div>
   );

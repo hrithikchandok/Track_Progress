@@ -41,3 +41,15 @@ The **Excalidraw** filter includes `.excalidraw` JSON files from all nested fold
 Snapshots, target lists, and sync timestamps are stored in localStorage scoped to the signed-in user. A successful sync replaces the snapshot, including removing deleted notes. Errors retain the last successful snapshot. Browser storage limits produce an explicit error. Vault snapshots are separate from tracker backup/reset and are local to this browser; clearing site data removes them. On shared computers, clear site data after use because signing out does not erase local snapshots.
 
 Run `node --test tests/vault.test.js` and `npm run build` to verify.
+
+## Editing on the website
+
+Notes and drawings can be edited in Prep Console and saved straight to GitHub.
+
+- **Notes:** select a note, switch the preview to **Edit**, change the Markdown (frontmatter included), then **Save** (or ⌘S / Ctrl+S).
+- **Drawings:** **Open canvas** opens the drawing in an editable Excalidraw canvas. **Save** (or ⌘S) commits the `.excalidraw` file. The file keeps its original background colour.
+- Unsaved edits are kept per file while you move between notes and drawings (a green dot marks them). Leaving the site with unsaved edits asks for confirmation.
+- Each save is one commit, `Edit <path> via Prep Console`, on the default branch, through `POST /api/vault-save`.
+- **Conflicts:** a save sends the file version it started from. If the file changed on GitHub in the meantime (for example you pushed from Obsidian), the save is refused with a message and your edit stays in the editor. Sync the vault and re-apply it.
+- **Setup:** set `GITHUB_TOKEN` (fine-grained, this repository only, **Contents: Read and write**) and `VAULT_OWNER_USER_ID` in Vercel and in `.env.local`. Without both, saving shows "Editing is not configured" and nothing is written. Only the owner's signed-in session can save.
+- **Getting edits into Obsidian:** Obsidian reads your local folder, so it needs a `git pull`. With the **Obsidian Git** plugin, turn on *Pull on startup* and an *Auto pull interval* (for example 5 minutes), and keep auto commit-and-push on for local edits so both sides stay in step.

@@ -152,18 +152,17 @@ export default function DashboardPage({ userId, onSignOut }) {
     <div className="wrap">
       <TopNav
         active="tracker"
-        links={[{ key: 'tracker', label: '◷ Tracker', to: '/' }, { key: 'articles', label: '✎ Articles', to: '/articles' }]}
+        onSignOut={onSignOut}
         right={(
           <>
             {showMini && (
               <span className="nav-clock">
-                <i className="nav-clock-dot">◎</i>
+                <i className="nav-clock-dot" aria-hidden="true" />
                 <span className="nav-clock-time">{pad(clock.hours)}:{pad(clock.minutes)}:{pad(clock.seconds)}</span>
                 <span className="nav-clock-label">left today</span>
               </span>
             )}
-            {username && <a className="topnav-ext" href={`/u/${username}`} target="_blank" rel="noopener noreferrer">↗ Public view</a>}
-            {onSignOut && <button className="topnav-signout" onClick={onSignOut}>Sign out</button>}
+            {username && <a className="topnav-ext" href={`/u/${username}`} target="_blank" rel="noopener noreferrer">Public view</a>}
           </>
         )}
       />
